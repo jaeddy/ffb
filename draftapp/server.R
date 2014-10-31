@@ -3,8 +3,10 @@ library(dplyr)
 library(reshape2)
 library(rCharts)
 
-source("initialize_data.R")
-
+# source("initialize_data.R")
+source("load_data.R")
+str(rosterTable)
+str(projections)
 
 shinyServer(function(input, output, session) {
     
@@ -29,9 +31,16 @@ shinyServer(function(input, output, session) {
             slot_idx <- team_idx & values$table$player == "" &
                 grepl(pos, values$table$slot)
             
+            flex_idx <- team_idx & values$table$player == "" &
+                grepl("FLEX", values$table$slot)
+            
             if (!any(slot_idx)) {
-                slot_idx <- team_idx & values$table$player == "" &
-                    grepl("BENCH", values$table$slot)
+                if (any(flex_idx) & pos %in% c("RB", "WR", "TE")) {
+                    slot_idx <- flex_idx
+                } else {
+                    slot_idx <- team_idx & values$table$player == "" &
+                        grepl("BENCH", values$table$slot)
+                }
             }
             
             table_idx <- seq(along = slot_idx)[slot_idx]
@@ -41,12 +50,16 @@ shinyServer(function(input, output, session) {
                         c(input$player, pos))
             isolate(values$table[table_idx[1], 5:6] <- 
                         c(pts, as.numeric(input$amount)))
+            write.csv(values$table, "rosters.csv")
             
             # udpate ticker
-            isolate(values$ticker[length(values$ticker) + 1] <- 
-                        paste(input$draftTeam, "selected",
-                              input$player, "for",
-                              input$amount))
+            isolate(values$ticker <- append(paste(paste0(values$count + 1, ":"),
+                                                  input$draftTeam, "selected",
+                                                  input$player, "for",
+                                                  input$amount),
+                                            values$ticker)
+            )
+            write.csv(values$ticker, "draftLog.csv")
             
             # update projections
             isolate(values$projections <- values$projections %>%
@@ -71,6 +84,22 @@ shinyServer(function(input, output, session) {
     output$ticker <- renderUI({
         HTML(paste(values$ticker, collapse = "<br/>"))
     })
+    
+    
+    # Download data
+    output$downloadTicker <- downloadHandler(
+        filename = "draftLog.csv",
+        content = function(file) {
+            write.csv(saveTicker(), file)
+        }
+    )
+    
+    output$downloadTable <- downloadHandler(
+        filename = "rosterTable.csv",
+        content = function(file) {
+            write.csv(saveTable(), file)
+        }
+    )
     
     # Create league-tracker chart
     output$moneyChart <- renderChart({

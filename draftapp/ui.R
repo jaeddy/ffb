@@ -1,7 +1,8 @@
 library(shiny)
 library(rCharts)
 
-source("initialize_data.R")
+# source("initialize_data.R")
+source("load_data.R")
 
 shinyUI(fluidPage(
     
@@ -57,11 +58,11 @@ shinyUI(fluidPage(
                
                wellPanel(
                    fluidRow(
-                       column(6,
+                       column(7,
                               h4(textOutput("currdentTeam")),
                               tableOutput("currentTable")
                        ),
-                       column(6,
+                       column(5,
                               h4("Summary"),
                               fluidRow(
                                   column(6,

@@ -1,0 +1,33 @@
+name,pos,team,overallRank,positionRank,vor,projectedPts,upside,risk,dropoff,projectedCost
+Seattle Seahawks,DST,SEA,,1,,,,,,$1 
+San Francisco 49ers,DST,SF,,2,,,,,,$1 
+Carolina Panthers,DST,CAR,,3,,,,,,$1 
+St. Louis Rams,DST,STL,,4,,,,,,$1 
+Cincinnati Bengals,DST,CIN,,5,,,,,,$1 
+Denver Broncos,DST,DEN,,6,,,,,,$1 
+Arizona Cardinals,DST,ARI,,7,,,,,,$1 
+New England Patriots,DST,NE,,8,,,,,,$1 
+Kansas City Chiefs,DST,KC,,9,,,,,,$1 
+Baltimore Ravens,DST,BAL,,10,,,,,,$1 
+Houston Texans,DST,HOU,,11,,,,,,$1 
+Tampa Bay Buccaneers,DST,TB,,12,,,,,,$1 
+Cleveland Browns,DST,CLE,,13,,,,,,$0 
+New Orleans Saints,DST,NO,,14,,,,,,$0 
+Buffalo Bills,DST,BUF,,15,,,,,,$0 
+Pittsburgh Steelers,DST,PIT,,16,,,,,,$0 
+Green Bay Packers,DST,GB,,17,,,,,,$0 
+Chicago Bears,DST,CHI,,18,,,,,,$0 
+New York Jets,DST,NYJ,,19,,,,,,$0 
+Miami Dolphins,DST,MIA,,20,,,,,,$0 
+New York Giants,DST,NYG,,21,,,,,,$0 
+Detroit Lions,DST,DET,,22,,,,,,$0 
+Philadelphia Eagles,DST,PHI,,23,,,,,,$0 
+Tennessee Titans,DST,TEN,,24,,,,,,$0 
+Minnesota Vikings,DST,MIN,,25,,,,,,$0 
+Indianapolis Colts,DST,IND,,26,,,,,,$0 
+San Diego Chargers,DST,SD,,27,,,,,,$0 
+Jacksonville Jaguars,DST,JAC,,28,,,,,,$0 
+Washington Redskins,DST,WAS,,29,,,,,,$0 
+Atlanta Falcons,DST,ATL,,30,,,,,,$0 
+Oakland Raiders,DST,OAK,,31,,,,,,$0 
+Dallas Cowboys,DST,DAL,,32,,,,,,$0 
