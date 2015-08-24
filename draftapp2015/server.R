@@ -1,7 +1,5 @@
 library(shiny)
 library(dplyr)
-library(reshape2)
-library(rCharts)
 
 source("initialize_data.R")
 source("functions.R")

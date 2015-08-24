@@ -1,4 +1,6 @@
+library(readr)
 library(dplyr)
+library(reshape2)
 
 teams <- c("Kevin", "Matt", "Brad", "Tony", "Drew", "James", "Shep", "Milf",
            "Toby", "Keith", "Ross", "Billy")

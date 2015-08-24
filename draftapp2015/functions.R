@@ -1,3 +1,8 @@
+library(readr)
+library(dplyr)
+library(reshape2)
+library(rCharts)
+library(stringr)
 
 get_table_idx <- function(rosterTable, team_idx, pos) {
   slot_idx <- team_idx & rosterTable$player == "" &
