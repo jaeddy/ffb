@@ -8,10 +8,14 @@ shinyServer(function(input, output, session) {
   
   # Collect input data for current auction
   values <- reactiveValues()
-  values$bid <- 0
+  values$bid <- 1
+  values$updateCount <- 0
+  values$resetCount <- 0
+  values$editCount <- 0
   values$table <- rosterTable
   values$ticker <- ticker
   values$projections <- projections
+  values$budgets <- budgets
   
   loadData <- observe({
     if (input$load == 1) {
@@ -25,31 +29,31 @@ shinyServer(function(input, output, session) {
   
   # Update table and ticker data
   updateData <- observe({
-    if (input$update > values$bid) {
+    if (input$update > values$updateCount) {
       team_idx <- values$table$team == input$draftTeam
       
       playerInfo <- values$projections %>%
         filter(name == input$player) %>%
-        select(position, projectedPoints)
-      pos <- as.character(playerInfo[[1]])
-      pts <- round(playerInfo[[2]], 1)
+        select(position, playerTeam, projectedPoints)
+      pos <- as.character(playerInfo$position)
+      pteam <- as.character(playerInfo$playerTeam)
+      pts <- round(playerInfo$projectedPoints, 1)
       
       table_idx <- get_table_idx(values$table, team_idx, pos)
       
       # update roster table
-      isolate(values$table[table_idx[1], 3:4] <- 
-                c(input$player, pos))
-      isolate(values$table[table_idx[1], 5:7] <- 
-                c(pts, values$bid + 1, as.numeric(input$amount)))
+      isolate(values$table[table_idx[1], 3:5] <- 
+                c(input$player, pteam, pos))
+      isolate(values$table[table_idx[1], 6:8] <- 
+                c(pts, values$bid, as.numeric(input$amount)))
       write.csv(values$table, "rosters.csv")
       
       # udpate ticker
-      isolate(values$ticker <- append(paste(paste0(values$bid + 1, ":"),
+      isolate(values$ticker <- append(paste(paste0(values$bid, ":"),
                                             input$draftTeam, "selected",
                                             input$player, "for",
                                             input$amount),
-                                      values$ticker)
-      )
+                                      values$ticker))
       write.csv(values$ticker, "draftLog.csv")
       
       # update projections
@@ -59,22 +63,105 @@ shinyServer(function(input, output, session) {
       # update bid number
       isolate(values$bid <- values$bid + 1)
       
+      # update count
+      isolate(values$updateCount <- values$updateCount + 1)
+      
       updateSelectInput(session, "player",
                         "Player nominated:",
                         values$projections$name,
                         selected = values$projections$name[1])
       updateTextInput(session, "amount",
-                      "Winning bid:",
-                      1)
+                      "Winning bid:", 1)
       updateSelectInput(session, "draftTeam",
                         "Highest bidder:",
                         c(Choose = "", teams))
     } 
   })
   
+  # Reset table and ticker data
+  resetData <- observe({
+    if (input$undo > values$resetCount & values$bid > 1) {
+      table_idx <- which(values$table$bidNum == values$bid - 1 )
+      # print(table_idx)
+      player <- values$table$player[table_idx]
+      
+      # reset roster table
+      isolate(values$table[table_idx, 3:5] <- 
+                c("", "", ""))
+      isolate(values$table[table_idx, 6:8] <- 
+                c(0, 0, 0))
+      write.csv(values$table, "rosters.csv")
+      
+      # reset ticker
+      isolate(values$ticker <- values$ticker[-1])
+      write.csv(values$ticker, "draftLog.csv")
+      
+      # reset projections
+      isolate(values$projections <- projections %>% 
+                filter(name == player) %>% 
+                bind_rows(values$projections))
+      
+      # reset bid number
+      isolate(values$bid <- values$bid - 1)
+      
+      # update reset count
+      isolate(values$resetCount <- values$resetCount + 1)
+      
+      updateSelectInput(session, "player",
+                        "Player nominated:",
+                        values$projections$name,
+                        selected = values$projections$name[1])
+    }
+  })
+  
+  editBudget <- observe({
+    if (input$edit > values$editCount) {
+      budgetVal <- budget
+      isolate(values$budgets <- values$budgets %>% 
+                mutate(amount = ifelse(budget == input$budgetOpt & slot == "QB",
+                                       as.numeric(input$qbVal), amount)))
+      isolate(values$budgets <- values$budgets %>% 
+                mutate(amount = ifelse(budget == input$budgetOpt & slot == "RB1",
+                                       as.numeric(input$rb1Val), amount)))
+      isolate(values$budgets <- values$budgets %>% 
+                mutate(amount = ifelse(budget == input$budgetOpt & slot == "RB2",
+                                       as.numeric(input$rb2Val), amount)))
+      isolate(values$budgets <- values$budgets %>% 
+                mutate(amount = ifelse(budget == input$budgetOpt & slot == "WR1",
+                                       as.numeric(input$wr1Val), amount)))
+      isolate(values$budgets <- values$budgets %>% 
+                mutate(amount = ifelse(budget == input$budgetOpt & slot == "WR2",
+                                       as.numeric(input$wr2Val), amount)))
+      isolate(values$budgets <- values$budgets %>% 
+                mutate(amount = ifelse(budget == input$budgetOpt & slot == "FLEX",
+                                       as.numeric(input$flexVal), amount)))
+      isolate(values$budgets <- values$budgets %>% 
+                mutate(amount = ifelse(budget == input$budgetOpt & slot == "TE",
+                                       as.numeric(input$teVal), amount)))
+      isolate(values$budgets <- values$budgets %>% 
+                mutate(amount = ifelse(budget == input$budgetOpt & slot == "DST",
+                                       as.numeric(input$dstVal), amount)))
+      isolate(values$budgets <- values$budgets %>% 
+                mutate(amount = ifelse(budget == input$budgetOpt & slot == "K",
+                                       as.numeric(input$kVal), amount)))
+      isolate(values$budgets <- values$budgets %>% 
+                group_by(budget) %>% 
+                mutate(total = sum(amount)) %>% 
+                mutate(amount = ifelse(budget == budgetOpt & slot == "BENCH", 
+                                       budgetVal - total - 5, amount)) %>% 
+                select(-total) %>% 
+                ungroup())
+      isolate(values$editCount <- values$editCount + 1)
+      
+      updateTextInput(session, "benchVal", "BENCH", 
+                      (values$budgets %>% 
+                         filter(budget == budgetOpt & slot == "BENCH"))$amount)
+    }
+  })
+  
   # Output bid number
   output$bidNum <- renderText({
-    as.character(values$bid + 1)
+    as.character(values$bid)
   })
   
   # Output updated log
@@ -106,10 +193,14 @@ shinyServer(function(input, output, session) {
     get_percent_chart(values$table, rosterSize)
   })
   
-  # Organize data for viewing team info
-  output$currentTeam <- renderText({
-    paste0(input$viewTeam, "'s Team")
-  })
+  output$budgetSummary <- renderTable({
+    format_budget(values$budgets, input$budgetOpt)
+  }, include.rownames = FALSE)
+  
+  output$budgetTable <- renderTable({
+    get_current_budget(budgets, input$budgetOpt) %>% 
+      select(-budget)
+  }, include.rownames = FALSE)
   
   # -- Suggested picks
   output$myTable <- renderDataTable({
@@ -120,10 +211,21 @@ shinyServer(function(input, output, session) {
     numPicks <- as.numeric(input$numPicks)
     wiggle <- as.numeric(input$wiggle)
     
-    get_my_table(budgets, values$projections, budgetOpt, maxBid,
+    get_my_table(values$budgets, values$projections, budgetOpt, maxBid,
                  displaySlots, numPicks, wiggle)
-  }, options = list(pageLength = 5, searching = FALSE)
+  }, options = list(pageLength = 10, searching = FALSE)
   )
+  
+  # Organize data for viewing team info
+  output$currentTeam <- renderText({
+    paste0(input$viewTeam, "'s Team")
+  })
+  
+  output$freeBudget <- renderText({
+    curBudget <- values$budgets %>% 
+      filter(budget == input$budgetOpt)
+    budget - sum(curBudget$amount)
+  })
   
   # -- Current roster table
   output$currentTable <- renderTable({
@@ -138,16 +240,13 @@ shinyServer(function(input, output, session) {
     get_remaining_slots(values$table, input$viewTeam, rosterSize)
   })
   
-  output$budgetTable <- renderTable({
-    format_budget(budgets, input$budgetOpt)
-  })
-  
   # -- Remaining players
   output$remainTable <- renderDataTable({
-    values$projections
+    values$projections %>% 
+      rename(team = playerTeam)
   }, options = list(pageLength = 10, 
                     columnDefs = list(list(className = "dt-center",
-                                           targets = c(3:7) - 1, 
+                                           targets = c(3:8) - 1, 
                                            searchable = FALSE)))
   )
   

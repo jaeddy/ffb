@@ -11,12 +11,14 @@ slots <- c("QB", "RB1", "RB2", "WR1", "WR2", "FLEX", "TE", "DST", "K",
 
 rosterSize <- length(slots)
 budget <- 200
+maxBid <- budget - length(slots) + 1
 ticker <- "no players drafted yet"
 
 rosterList <- lapply(teams, function (x) { data_frame(team = x,
                                                   slot = slots,
                                                   player = "",
                                                   position = "",
+                                                  playerTeam = "",
                                                   projPts = 0,
                                                   bidNum = 0,
                                                   paid = 0) })
@@ -30,7 +32,7 @@ projections <- read_csv("FFA-Projections-ESPN.csv")
 
 # Format projection data
 projections <- projections %>% 
-    dplyr::select(name = playername, position, 
+    dplyr::select(name = playername, position, playerTeam = playerteam,
                   projectedPoints = points, 
                   pointsLo = lower, pointsHi = upper, risk, 
                   projectedCost = as.numeric(auctionValue)) %>% 
@@ -54,5 +56,18 @@ projections <- projections %>%
 budgets <-read_csv("budgets.csv")
 budgets <- budgets %>% 
   melt(id.vars = "slot", variable.name = "budget", value.name = "amount")
+
+budgetVal <- budget
+budgets <- budgets %>% 
+  group_by(budget) %>% 
+  mutate(total = sum(amount)) %>% 
+  mutate(amount = ifelse(slot == "BENCH", budgetVal - total - 5, amount)) %>% 
+  select(-total) %>% 
+  ungroup()
+
+budgetOpt <- budgets$budget[1]
+curBudget <- budgets %>%
+  filter(budget == budgetOpt)
+
 
 

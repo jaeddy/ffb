@@ -69,7 +69,8 @@ get_current_budget <- function(budgets, budgetOpt) {
 }
 
 format_budget <- function(budgets, budgetOpt) {
-  curBudget <- get_current_budget(budgets, budgetOpt)
+  curBudget <- get_current_budget(budgets, budgetOpt) %>% 
+    mutate(amount = as.character(amount))
   row.names(curBudget) <- curBudget$slot
   curBudget %>% 
     select(-budget, -slot) %>% 
@@ -99,7 +100,8 @@ get_my_table <- function(budgets, projections, budgetOpt, maxBid,
       filter(position %in% posList ,
              projectedCost <= budgetSlot$amount + wiggle) %>% 
       slice(1:numPicks) %>%
-      mutate(position = slot)
+      mutate(position = slot) %>% 
+      rename(team = playerTeam)
   })
   
   bind_rows(pickList) %>% 
@@ -113,7 +115,7 @@ get_team_table <- function(rosterTable, viewTeam) {
 
 get_current_roster <- function(rosterTable, viewTeam) {
   get_team_table(rosterTable, viewTeam) %>% 
-    select(slot, player, position, projPts, paid) %>%
+    select(slot, player, position, team = playerTeam, projPts, paid) %>%
     mutate(projPts = as.character(projPts),
            paid = as.character(paid))
 }
