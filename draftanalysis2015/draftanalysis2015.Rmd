@@ -27,7 +27,7 @@ library(shiny)
 ```{r settings_functions}
 myCbPal <- colorblind_pal()(8)
 myCbPal[c(1, 3, 6)] <- myCbPal[c(6, 1, 3)]
-myCbPal[3] <- "#555555"
+myCbPal[3] <- "#666666"
 
 source("functions.R")
 ```
@@ -38,8 +38,8 @@ source("functions.R")
 
 + **draft_results.csv:** auction draft results; recorded during the draft on
 8/25/2015
-+ **espn_projections.csv:** **ESPN** projections; accessed on 9/3/2015 using 
-the **`R`** script forked from this 
++ **espn_projections.csv:** ESPN projections; accessed on 9/3/2015 using 
+the **R** script forked from this 
 [repo](https://github.com/dadrivr/FantasyFootballAnalyticsR) and available 
 [here](https://github.com/jaeddy/FantasyFootballAnalyticsR/blob/master/R%20Scripts/Projections/ESPN%20Projections.R) 
 (after adjusting league settings)  
@@ -62,7 +62,7 @@ probably are to some extent. Because I don't have projections etc. from 8/25,
 this is my best approximation for comparing how teams looked coming out of
 the draft.
 
-```{r load_data}
+```{r load_data, cache=TRUE}
 # Load draft results (and drop the first column)
 rosters <- read_csv("data/draft_results.csv") %>% .[, -1] %>% 
   rename(owner = team, team = position, position = playerTeam)
@@ -100,8 +100,9 @@ free to check out the
 [code](link)
 , if you want to learn more.
 
-```{r update_data}
-# Assign draft-time FAs to their current teams
+```{r update_data, cache=TRUE}
+if (!file.exists("draft_data.csv")) {
+  # Assign draft-time FAs to their current teams
 rosters <- rosters %>% 
   mutate(team = ifelse(player == "Chris Johnson", "ARI", team),
          team = ifelse(player == "Reggie Wayne", "NE", team))
@@ -122,45 +123,51 @@ espnProjections <- espnProjections %>%
               filter(position == "DST") %>% 
               select(playername, pos = position, team_espn = team)) %>% 
   mutate(name = ifelse(pos == "DST", str_to_upper(playername), name))
+}
 ```
 
-```{r combine_data}
+```{r combine_data, cache=TRUE}
 str_uniform <- Vectorize(function(string) {
   string %>% 
     str_to_upper() %>% 
     str_replace_all(" |\\.", "")
 })
 
-# Keep owner, slot, player cost from rosters
-rostersSub <- rosters %>% 
-  select(owner, slot, player, team, draftValue = paid) %>% 
-  mutate(player = str_uniform(player))
-
-# Keep player, player info, player rankings, player cost, and player points
-# from ffaProjections
-ffaProjectionsSub <- ffaProjections %>% 
-  select(player = playername, position, team, vor, 
-         overallECR, overallRank, positionRank, risk, avgValue = auctionValue,
-         ffaPoints = points, ffaCeiling = upper, ffaFloor = lower) %>% 
-  mutate(playerName = player,
-         player = str_uniform(player))
-
-# Keep player and player points from espnProjections
-espnProjectionsSub <- espnProjections %>% 
-  select(player = name, team = team_espn, espnPoints = points)
-
-draftDat <- rostersSub %>% 
-  left_join(ffaProjectionsSub) %>% 
-  left_join(espnProjectionsSub) %>% 
-  distinct(player, team)
-
-# Manually update Nate Washington's ESPN projection; replace NAs with 0s
-draftDat <- draftDat %>% 
-  mutate(espnPoints = ifelse(player == "NATEWASHINGTON", 89.7, espnPoints),
-         espnPoints = ifelse(is.na(espnPoints), 0, espnPoints),
-         ffaPoints = ifelse(is.na(ffaPoints), 0, ffaPoints),
-         position = ifelse(is.na(position), slot, position),
-         avgValue = ifelse(is.na(avgValue), 0, avgValue))
+if (!file.exists("draft_data.csv")) {
+  # Keep owner, slot, player cost from rosters
+  rostersSub <- rosters %>% 
+    select(owner, slot, player, team, draftValue = paid) %>% 
+    mutate(player = str_uniform(player))
+  
+  # Keep player, player info, player rankings, player cost, and player points
+  # from ffaProjections
+  ffaProjectionsSub <- ffaProjections %>% 
+    select(player = playername, position, team, vor, 
+           overallECR, overallRank, positionRank, risk, avgValue = auctionValue,
+           ffaPoints = points, ffaCeiling = upper, ffaFloor = lower) %>% 
+    mutate(playerName = player,
+           player = str_uniform(player))
+  
+  # Keep player and player points from espnProjections
+  espnProjectionsSub <- espnProjections %>% 
+    select(player = name, team = team_espn, espnPoints = points)
+  
+  draftDat <- rostersSub %>% 
+    left_join(ffaProjectionsSub) %>% 
+    left_join(espnProjectionsSub) %>% 
+    distinct(player, team)
+  
+  # Manually update Nate Washington's ESPN projection; replace NAs with 0s
+  draftDat <- draftDat %>% 
+    mutate(espnPoints = ifelse(player == "NATEWASHINGTON", 89.7, espnPoints),
+           espnPoints = ifelse(is.na(espnPoints), 0, espnPoints),
+           ffaPoints = ifelse(is.na(ffaPoints), 0, ffaPoints),
+           position = ifelse(is.na(position), slot, position),
+           avgValue = ifelse(is.na(avgValue), 0, avgValue))
+  write_csv(draftDat, "draft_data.csv")
+} else {
+  draftDat <- read_csv("draft_data.csv")
+}
 ```
 
 ----- 
@@ -185,44 +192,65 @@ draftDat <- draftDat %>%
 Use the toggle to switch between graphs separated by owner or by position.
 
 ```{r compare_position_counts_by_owner}
-radioButtons("groupBy", "Group by:", c("position", "owner"), inline = TRUE)
+shinyApp(
+  ui = fluidPage(
+    fluidRow(
+      column(3,
+             br(),
+             wellPanel(
+             radioButtons("groupBy", "Group by:", c("position", "owner"), 
+                          inline = TRUE),
+             hr(),
+             checkboxInput("includeAvgCounts", "Show league averages"))),
+      column(9,
+             plotOutput("positionCounts"))
+    )
+  ),
 
-renderPlot({
-  groupBy <- input$groupBy
-  if (groupBy == "position") {
-    draftDat %>% 
-      group_by(position) %>% 
-      mutate(avgCount = mean(posCount)) %>% 
-      ungroup() %>% 
-      ggplot(aes(x = owner, y = posCount)) +
-      geom_hline(aes(yintercept = avgCount), 
-               size = 1, colour = myCbPal[3]) +
-      stat_summary(aes(fill = posCount), fun.y = max, 
-                   geom = "bar", position = "dodge", alpha = 0.7) + 
-      facet_wrap(~ position) +
-      theme(axis.text.x = element_text(angle = -90, hjust = 0)) +
-      scale_y_continuous(breaks = 1:9) +  
-      scale_fill_gradient(low = myCbPal[6], high = myCbPal[1], 
-                          guide = FALSE) +
-      ylab("# players")
-} else if (groupBy == "owner") {
-  draftDat %>% 
-    group_by(position) %>% 
-    mutate(avgCount = mean(posCount)) %>% 
-    ungroup() %>%
-    ggplot(aes(x = position, y = posCount)) +
-    geom_errorbar(aes(y = avgCount, ymin = avgCount, ymax = avgCount),
-                  size = 1, colour = myCbPal[3]) +
-    stat_summary(aes(fill = posCount), fun.y = max, 
-                 geom = "bar", position = "dodge", alpha = 0.7) +
-    facet_wrap(~ owner, nrow = 2) +
-    theme(axis.text.x = element_text(angle = -90, hjust = 0)) +
-    scale_y_continuous(breaks = 1:9) +  
-    scale_fill_gradient(low = myCbPal[6], high = myCbPal[1], 
-                        guide = FALSE) +
-    ylab("# players")
-}
-}, width = 750, height = 500, res = 100)
+  server = function(input, output) {
+    output$positionCounts <- renderPlot({
+      groupBy <- input$groupBy
+      includeAvgCounts <- input$includeAvgCounts
+      
+      data <- draftDat %>% 
+          group_by(position) %>% 
+          mutate(avgCount = mean(posCount)) %>% 
+          ungroup()
+      
+      p <- data %>% 
+        ggplot(aes(x = owner, y = posCount))
+      
+      if (groupBy == "position") {
+        p <- data %>% 
+          ggplot(aes(x = owner, y = posCount))
+        if (includeAvgCounts) {
+          p <- p +geom_hline(aes(yintercept = avgCount), 
+                             size = 1, colour = myCbPal[3])
+        }
+        p <- p + facet_wrap(~ position)
+      } else if (groupBy == "owner") {
+        p <- data %>% 
+          ggplot(aes(x = position, y = posCount))
+        if (includeAvgCounts) {
+          p <- p + geom_errorbar(aes(y = avgCount, ymin = avgCount, 
+                                     ymax = avgCount),
+                                 size = 1, colour = myCbPal[3])
+        }
+        p <- p + facet_wrap(~ owner, nrow = 2)
+      }
+      
+      p <- p + stat_summary(aes(fill = posCount), fun.y = max, 
+                            geom = "bar", position = "dodge", alpha = 0.7) + 
+        theme(axis.text.x = element_text(angle = -90, hjust = 0)) +
+        scale_y_continuous(breaks = 1:9) +  
+        scale_fill_gradient(low = myCbPal[6], high = myCbPal[1], 
+                            guide = FALSE) +
+        ylab("# players")
+      return(p)
+    }, height = 500, res = 96)
+  },
+  options = list(height = 520)
+)
 ```
 
 ##### **Some thoughts on position counts:**
@@ -246,9 +274,9 @@ of a risk at the time) --- nobody knows why
 
 On to more interesting stuff...
 
-**ESPN** has a table that shows average auction values for players across all 
+ESPN has a table that shows average auction values for players across all 
 leagues using their system (though I had to actually access these values 
-through the **FFA** app). While these average values don't take into account
+through the FFA app). While these average values don't take into account
 the specific size and settings of our league*, they provide context for 
 exploring the spending habits of individual owners and the league as a whole.
 
@@ -267,12 +295,12 @@ draftCostDat <- draftDat %>%
 #### Overall spending vs. ESPN average
 
 Directly comparing dollars paid for all individual players to their average 
-auction values on **ESPN**, we get a nice picture of overall spending. The 
-dashed black line in the graph represents perfect agreement with the **ESPN**
+auction values on ESPN, we get a nice picture of overall spending. The 
+dashed black line in the graph represents perfect agreement with the ESPN
 average; if points fall above that line, it means someone paid more than
 average (and vice versa, if a point falls below the line). I also fit a simple 
 line to the data, which shows that --- as a league --- we tend to spend more 
-on players than the averge bidder on **ESPN**. This seems to be especially 
+on players than the averge bidder on ESPN. This seems to be especially 
 true for the most expensive players (i.e., top RBs, WRs, and QBs).
 
 \  
@@ -281,59 +309,88 @@ Use the drop-down to highlight the points for a specific team. You can also see
 how the spending trend for that owner compares to the league trend.
 
 ```{r compare_overall_spending}
-selectInput("highlightTeam", "Highlight team:", 
-            c("None", unique(rosters$owner)))
+shinyApp(
+  ui = fluidPage(
+    fluidRow(
+      column(3,
+             br(),
+             wellPanel(
+             selectInput("highlightTeam", "Highlight team:", 
+                         c("None", unique(rosters$owner))),
+             hr(),
+             checkboxInput("includeFit", "Show fit"))),
+      column(9,
+             plotOutput("overallSpending"))
+    )
+  ),
 
-renderPlot({
-  highlightTeam <- input$highlightTeam
-  draftDat %>% 
-    mutate(highlight = factor(ifelse(owner %in% highlightTeam,
-                              owner, "League")) %>% 
-             relevel("League")) %>% 
-    ggplot(aes(x = avgValue, y = draftValue)) +
-    geom_abline(intercept = 0, slope = 1, 
-                colour = myCbPal[3], size = 1, linetype = 2) +
-    geom_point(fill = myCbPal[1],
-               shape = 21, size = 3, colour = "white", alpha = 0.6) +
-    geom_smooth(aes(colour = highlight), size = 1, alpha = 0, method = "lm") +
-    geom_point(fill = myCbPal[2], 
-               shape = 21, size = 4, colour = "white",
-               aes(alpha = highlight)) +
-    scale_alpha_manual(values = c(0, 1), guide = FALSE) +
-    scale_fill_manual(values = myCbPal, 
-                      guide = guide_legend(title = "Spending vs. ESPN")) +
-    scale_colour_manual(values = myCbPal, 
-                        guide = guide_legend(title = "Spending vs. ESPN")) +
-    ylab("Actual bid") +
-    xlab("ESPN avg.") +
-    xlim(c(-5, 60)) +
-    ylim(c(-5, 67))
-    
-}, width = 750, height = 500, res = 100)
+  server = function(input, output) {
+    output$overallSpending <- renderPlot({
+      highlightTeam <- input$highlightTeam
+      includeFit <- input$includeFit
+      
+      data <- draftDat %>% 
+        mutate(highlight = factor(ifelse(owner %in% highlightTeam,
+                                         owner, "League")) %>% 
+                 relevel("League"))
+      
+      p <- data %>% 
+        ggplot(aes(x = avgValue, y = draftValue)) +
+        geom_abline(intercept = 0, slope = 1, 
+                    colour = myCbPal[3], size = 1, linetype = 2) +
+        geom_point(aes(fill = highlight),
+                   shape = 21, size = 3, colour = "white", alpha = 0.6)
+      
+      if (includeFit) {
+        p <- p + geom_smooth(aes(colour = highlight), method = "lm",
+                             size = 1, alpha = 0)
+      }
+      
+      if (highlightTeam != "None") {
+        p <- p + geom_point(fill = myCbPal[2], 
+                            shape = 21, size = 4, colour = "white",
+                            aes(alpha = highlight))
+      }
+      
+      p <- p + scale_alpha_manual(values = c(0, 1), guide = FALSE) +
+        scale_fill_manual(values = myCbPal, 
+                          guide = guide_legend(title = "Spending vs. ESPN")) +
+        scale_colour_manual(values = myCbPal, 
+                            guide = guide_legend(title = "Spending vs. ESPN")) +
+        ylab("Actual bid") +
+        xlab("ESPN avg.") +
+        xlim(c(-5, 60)) +
+        ylim(c(-5, 67))
+      
+      return(p)
+    }, height = 500, res = 96)
+  },
+  options = list(height = 520)
+)
 ```
 
 + Based on the fairly simple linear fits, pretty much everyone in the league 
-spends more than the **ESPN** average --- again, this could just be an artifact
+spends more than the ESPN average --- again, this could just be an artifact
 of league size and scoring  
-+ Billy came the closest to matching **ESPN** values (on average)  
++ Billy came the closest to matching ESPN values (on average)  
 + Shep was the thriftiest owner in the draft, spending no more than 25 for any
 single player; while he overpaid relative to average values on the cheaper end,
-his trend would actually have him underpaying **ESPN** owners at higher costs 
+his trend would actually have him underpaying ESPN owners at higher costs 
 (if he had any)
 
 \  
 
 #### Spending by player ranking
 
-The **FFA** projections also include overall and position rankings, based on
+The FFA projections also include overall and position rankings, based on
 a weighted average of multiple fantasy sites and tailored to our league 
-settings. I took another look at **ESPN** average and Jeff Cup actual auction 
+settings. I took another look at ESPN average and Jeff Cup actual auction 
 values to see how spending patterns might vary based on player rank. While we
 tend to spend more on top ranked players, there's less difference at the 
 replacement level.
 
 The trend also depends on position. Player values track pretty consistently
-with **ESPN** averages for TEs. We also apparently spend less on average for
+with ESPN averages for TEs. We also apparently spend less on average for
 DSTs and Ks --- probably because we're not assholes.
 
 \  
@@ -343,42 +400,69 @@ trends. Use the slider bar to set the minimum rank, if you want a more zoomed
 in view.
 
 ```{r compare_league_cost_by_rank}
-radioButtons("positionFilter", "Choose position:", 
-              c("all", levels(draftDat$position)), inline = TRUE)
-sliderInput("rankCutoff", "Choose rank cutoff:", 10, 400, 100, 10)
-
-renderPlot({
-  if (input$positionFilter == "all") {
-    positionFilter <- unique(draftDat$position)
-    spender <- "League"
-    rankType <- "overallRank"
-    xlabel <- "Overall rank"
-  } else {
-    positionFilter <- input$positionFilter
-    spender <- input$positionFilter
-    rankType <- "positionRank"
-    xlabel <- "Position rank"
-  }
+shinyApp(
+  ui = fluidPage(
+    fluidRow(
+      column(3,
+             br(),
+             wellPanel(
+             radioButtons("positionFilter", "Choose position:", 
+                          c("all", levels(draftDat$position))),
+             sliderInput("rankCutoff", "Choose rank cutoff:", 10, 400, 100, 10),
+             hr(),
+             checkboxInput("includeFit2", "Show fit"))),
+      column(9,
+             plotOutput("spendingByRank"))
+    )
+  ),
   
-  rankCutoff <- input$rankCutoff
-  
-  draftCostDat %>% 
-    rename_(rank = rankType) %>% 
-    filter(position %in% positionFilter,
-           rank <= rankCutoff) %>% 
-    ggplot(aes(x = rank, y = cost)) +
-    geom_smooth(aes(colour = valueSource), size = 1, alpha = 0) +
-    geom_point(aes(fill = valueSource),
-               shape = 21, size = 3, colour = "white", alpha = 0.6) +
-    scale_fill_manual(values = myCbPal, 
-                      guide = guide_legend(title = "Spender"),
-                      labels = c("ESPN", spender)) +
-    scale_colour_manual(values = myCbPal, 
-                        guide = guide_legend(title = "Spender"),
-                        labels = c("ESPN", spender)) +
-    ylab("Auction value") +
-    xlab(xlabel)
-}, width = 750, height = 500, res = 100)
+  server = function(input, output) {
+    
+    output$spendingByRank <- renderPlot({
+      if (input$positionFilter == "all") {
+        positionFilter <- unique(draftDat$position)
+        spender <- "League"
+        rankType <- "overallRank"
+        xlabel <- "Overall rank"
+      } else {
+        positionFilter <- input$positionFilter
+        spender <- positionFilter
+        rankType <- "positionRank"
+        xlabel <- "Position rank"
+      }
+      
+      rankCutoff <- input$rankCutoff
+      includeFit <- input$includeFit2
+      
+      data <- draftCostDat %>% 
+        rename_(rank = rankType) %>% 
+        filter(position %in% positionFilter,
+               rank <= rankCutoff)
+      
+      p <- data %>% 
+        ggplot(aes(x = rank, y = cost))
+      
+      if (includeFit) {
+        p <- p + geom_smooth(aes(colour = valueSource), size = 1, alpha = 0)
+      }
+      
+      p <- p + geom_point(aes(fill = valueSource),
+                          shape = 21, size = 3, colour = "white", alpha = 0.6) +
+        scale_fill_manual(values = myCbPal, 
+                          guide = guide_legend(title = "Spender"),
+                          labels = c("ESPN", spender)) +
+        scale_colour_manual(values = myCbPal, 
+                            guide = guide_legend(title = "Spender"),
+                            labels = c("ESPN", spender)) +
+        ylab("Auction value") +
+        xlab(xlabel) +
+        ylim(c(0, max(data$cost) + 2))
+      
+      return(p)
+    }, height = 500, res = 96)
+  },
+  options = list(height = 520)
+)
 ```
 
 \  
@@ -386,45 +470,76 @@ renderPlot({
 #### Position spending by owner
 
 ```{r compare_owner_cost_by_position}
-selectInput("ownerFilter2", "Choose owner:", unique(rosters$owner))
-
-errBarVals <- function(y) {
-  c(mean(y) + sd(y), mean(y) - sd(y))
-}
-
-renderPlot({
-  ownerFilter <- input$ownerFilter2
-  spender <- input$ownerFilter2
+shinyApp(
+  ui = fluidPage(
+    fluidRow(
+      column(3,
+             br(),
+             wellPanel(
+             selectInput("ownerFilter1", "Choose owner:", 
+                         unique(rosters$owner)),
+             hr(),
+             checkboxInput("includeAvgCost", "Show league averages"),
+             checkboxInput("includeIndividual", "Show individual player costs"))),
+      column(9,
+             plotOutput("spendingByPosition"))
+    )
+  ),
   
-  draftCostDat %>% 
-    group_by(position, valueSource) %>% 
-    mutate(avgCost = mean(cost)) %>%
-    ungroup() %>% 
-    filter(owner %in% ownerFilter) %>% 
-    ggplot(aes(x = position, y = cost)) + 
-    geom_errorbar(aes(y = avgCost, ymin = avgCost, ymax = avgCost,
-                      alpha = valueSource), 
-                  size = 1, colour = myCbPal[3]) +
-    stat_summary(aes(fill = valueSource), fun.y = mean, 
-                 geom = "bar", position = position_dodge(), alpha = 0.7) +
-    geom_point(aes(fill = valueSource), 
-               shape = 21, size = 3, alpha = 0.7, colour = "white",
-               position = position_dodge(width = 0.75)) +
-    geom_point(aes(colour = valueSource), 
-               size = 3, alpha = 0,
-               position = position_dodge(width = 0.75)) +
-    scale_fill_manual(values = myCbPal, 
-                      guide = guide_legend(title = "Position avg.",
-                                           override.aes = list(shape = NA)),
-                      labels = c("ESPN", spender)) +
-    scale_colour_manual(values = myCbPal, 
-                        guide = guide_legend(title = "Player cost",
-                                             override.aes = list(alpha = 0.7)),
-                        labels = c("ESPN", spender)) +
-    scale_alpha_manual(values = c(0, 1), guide = FALSE) +
-    ylab("Auction value") +
-    xlab("Position")
-}, width = 750, height = 500, res = 100)
+  server = function(input, output) {
+    output$spendingByPosition <- renderPlot({
+      ownerFilter <- input$ownerFilter1
+      spender <- ownerFilter
+      includeAvgCost <- input$includeAvgCost
+      includeIndividual <- input$includeIndividual
+      
+      data <- draftCostDat %>% 
+        group_by(position, valueSource) %>% 
+        mutate(avgCost = mean(cost)) %>%
+        ungroup() %>% 
+        filter(owner %in% ownerFilter)
+      
+      p <- data %>% 
+        ggplot(aes(x = position, y = cost))
+      
+      if (includeAvgCost) {
+        p <- p + geom_errorbar(aes(y = avgCost, ymin = avgCost, ymax = avgCost,
+                                   alpha = valueSource), 
+                               size = 1, colour = myCbPal[3]) +
+          scale_alpha_manual(values = c(0, 1), guide = FALSE)
+      }
+      
+      p <- p + stat_summary(aes(fill = valueSource), fun.y = mean, 
+                            geom = "bar", position = position_dodge(), 
+                            alpha = 0.7) +
+        scale_fill_manual(values = myCbPal, 
+                          guide = guide_legend(title = "Position avg.",
+                                               override.aes = list(shape = NA)),
+                          labels = c("ESPN", spender)) +
+        ylab("Auction value") +
+        xlab("Position") +
+        ylim(c(0, 65))
+      
+      if (includeIndividual) {
+        p <- p + geom_point(aes(fill = valueSource), 
+                            shape = 21, size = 3, alpha = 0.7, 
+                            colour = "white",
+                            position = position_dodge(width = 0.75)) +
+          geom_point(aes(colour = valueSource), 
+                     size = 3, alpha = 0,
+                     position = position_dodge(width = 0.75)) +
+          scale_colour_manual(values = myCbPal, 
+                              guide = guide_legend(title = "Player cost",
+                                                   override.aes = 
+                                                     list(alpha = 0.7)),
+                              labels = c("ESPN", spender))
+      }
+      
+      return(p)
+    }, height = 500, res = 96)
+  },
+  options = list(height = 520)
+)
 ```
 
 \  
@@ -432,35 +547,53 @@ renderPlot({
 #### Individual player spending by owner
 
 ```{r compare_owner_costs_by_player}
-selectInput("ownerFilter1", "Choose owner:", unique(rosters$owner))
-
-renderPlot({
-  ownerFilter <- input$ownerFilter1
-  spender <- input$ownerFilter1
+shinyApp(
+  ui = fluidPage(
+    fluidRow(
+      column(3,
+             br(),
+             wellPanel(
+             selectInput("ownerFilter2", "Choose owner:", 
+                         unique(rosters$owner)))),
+      column(9,
+             plotOutput("spendingByPlayer"))
+    )
+  ),
   
-  teamCostDat <- draftCostDat %>% 
-    filter(owner %in% ownerFilter) %>% 
-    ungroup()
-  
-  playerOrder <- teamCostDat %>% 
-    group_by(playerName) %>% 
-    summarise(costOrder = mean(cost)) %>% 
-    arrange(desc(costOrder)) %>% 
-    select(playerName) %>% 
-    unlist()
-  
-  teamCostDat %>% 
-    mutate(playerName = factor(playerName, levels = playerOrder)) %>% 
-    ggplot(aes(x = playerName, y = cost)) +
-    geom_bar(aes(fill = valueSource), alpha = 0.7, 
-             position = "dodge", stat = "identity") +
-    theme(axis.text.x = element_text(angle = -90, hjust = 0)) +
-    scale_fill_manual(values = myCbPal, 
-                      guide = guide_legend(title = "Spender"),
-                      labels = c("ESPN", spender)) +
-    ylab("Auction value") +
-    xlab("Player")
-}, width = 750, height = 500, res = 100)
+  server = function(input, output) {
+    output$spendingByPlayer <- renderPlot({
+      ownerFilter <- input$ownerFilter2
+      spender <- ownerFilter
+      
+      data <- draftCostDat %>% 
+        filter(owner %in% ownerFilter) %>% 
+        ungroup()
+      
+      playerOrder <- data %>% 
+        group_by(playerName) %>% 
+        summarise(costOrder = mean(cost)) %>% 
+        arrange(desc(costOrder)) %>% 
+        select(playerName) %>% 
+        unlist()
+      
+      p <- data %>% 
+        mutate(playerName = factor(playerName, levels = playerOrder)) %>% 
+        ggplot(aes(x = playerName, y = cost)) +
+        geom_bar(aes(fill = valueSource), alpha = 0.7, 
+                 position = "dodge", stat = "identity") +
+        theme(axis.text.x = element_text(angle = -90, hjust = 0)) +
+        scale_fill_manual(values = myCbPal, 
+                          guide = guide_legend(title = "Spender"),
+                          labels = c("ESPN", spender)) +
+        ylab("Auction value") +
+        ylim(c(0, 65)) +
+        xlab("Player")
+      
+      return(p)
+    }, height = 500, res = 96)
+  },
+  options = list(height = 520)
+)
 ```
 
 -----  
@@ -481,31 +614,58 @@ if (file.exists("optimum_rosters.csv")) {
 ```
 
 ```{r compare_projected_points_by_position}
-radioButtons("selectedSource", "Choose projections source:",
-             c("ESPN", "FFA"), inline = TRUE)
-checkboxGroupInput("positionFilter2", "Include position(s):", 
-                   levels(draftDat$position), levels(draftDat$position),
-                   inline = TRUE)
-
-renderPlot({
-  positionFilter <- input$positionFilter2
-  selectedSource <- input$selectedSource
-  optRosters %>%
-    filter(pointSource == selectedSource,
-           position %in% positionFilter) %>% 
-    group_by(owner, pointSource) %>% 
-    summarise(totalPoints = sum(points)) %>%
-    ggplot(aes(x = owner, y = totalPoints)) +
-    geom_hline(aes(yintercept = mean(totalPoints)), 
-               size = 1, colour = myCbPal[3]) + 
-    geom_bar(aes(fill = totalPoints), stat = "identity", 
-             position = "dodge", alpha = 0.8) +
-    geom_text(aes(label = round(totalPoints, 2), y = totalPoints * .95),
-              position = "dodge", angle = -90, hjust = 0, size = 4) + 
-    scale_fill_gradient(low = myCbPal[6], high = myCbPal[1], guide = FALSE) +
-    theme(axis.text.x = element_text(angle = -90, hjust = 0)) +
-    ylab("Projected season points") +
-    xlab("Owner")
-}, width = 750, height = 500, res = 100)
+shinyApp(
+  ui = fluidPage(
+    fluidRow(
+      column(3,
+             br(),
+             wellPanel(
+               radioButtons("selectedSource", "Choose projections source:",
+                            c("ESPN", "FFA"), inline = TRUE),
+               checkboxGroupInput("positionFilter2", "Include position(s):", 
+                                  levels(draftDat$position), 
+                                  levels(draftDat$position)),
+               hr(),
+               checkboxInput("includeAvgPoints", "Show league average"))),
+      column(9,
+             plotOutput("projectedPoints"))
+    )
+  ),
+  
+  server = function(input, output) {
+    output$projectedPoints <- renderPlot({
+      positionFilter <- input$positionFilter2
+      selectedSource <- input$selectedSource
+      includeAvgPoints <- input$includeAvgPoints
+      
+      data <- optRosters %>%
+        filter(pointSource == selectedSource,
+               position %in% positionFilter) %>% 
+        group_by(owner, pointSource) %>% 
+        summarise(totalPoints = sum(points))
+      
+      p <- data %>% 
+        ggplot(aes(x = owner, y = totalPoints))
+      
+      if (includeAvgPoints) {
+        p <- p + geom_hline(aes(yintercept = mean(totalPoints)), 
+                            size = 1, colour = myCbPal[3])
+      }
+      
+      p <-p + geom_bar(aes(fill = totalPoints), stat = "identity", 
+                       position = "dodge", alpha = 0.8) +
+        geom_text(aes(label = round(totalPoints, 2), y = totalPoints * .95),
+                  position = "dodge", angle = -90, hjust = 0, size = 4) + 
+        scale_fill_gradient(low = myCbPal[6], high = myCbPal[1], 
+                            guide = FALSE) +
+        theme(axis.text.x = element_text(angle = -90, hjust = 0)) +
+        ylab("Projected season points") +
+        xlab("Owner")
+      
+      return(p)
+    }, height = 500, res = 96)
+  },
+  options = list(height = 520)
+)
 ```
 

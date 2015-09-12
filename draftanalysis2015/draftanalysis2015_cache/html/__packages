@@ -1,0 +1,9 @@
+base
+shiny
+readr
+dplyr
+reshape2
+stringr
+ggplot2
+ggthemes
+RColorBrewer
