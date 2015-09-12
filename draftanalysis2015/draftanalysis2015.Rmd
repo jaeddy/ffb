@@ -218,7 +218,8 @@ shinyApp(
              radioButtons("groupBy", "Group by:", c("position", "owner"), 
                           inline = TRUE),
              hr(),
-             checkboxInput("includeAvgCounts", "Show league averages"))),
+             checkboxInput("includeAvgCounts", "Show league averages",
+                           value = TRUE))),
       column(9,
              plotOutput("positionCounts"))
     )
@@ -340,7 +341,7 @@ shinyApp(
              selectInput("highlightTeam", "Highlight team:", 
                          c("None", unique(rosters$owner))),
              hr(),
-             checkboxInput("includeFit", "Show fit"))),
+             checkboxInput("includeFit", "Show fit", value = TRUE))),
       column(9,
              plotOutput("overallSpending"))
     )
@@ -432,7 +433,7 @@ shinyApp(
                           c("all", levels(draftDat$position))),
              sliderInput("rankCutoff", "Choose rank cutoff:", 10, 400, 100, 10),
              hr(),
-             checkboxInput("includeFit2", "Show fit"))),
+             checkboxInput("includeFit2", "Show fit", value = TRUE))),
       column(9,
              plotOutput("spendingByRank"))
     )
@@ -511,7 +512,7 @@ shinyApp(
              selectInput("ownerFilter1", "Choose owner:", 
                          unique(rosters$owner)),
              hr(),
-             checkboxInput("includeAvgCost", "Show league averages"),
+             checkboxInput("includeAvgCost", "Show league averages", value = TRUE),
              checkboxInput("includeIndividual", "Show individual player costs"))),
       column(9,
              plotOutput("spendingByPosition"))
@@ -684,7 +685,8 @@ shinyApp(
                                   levels(draftDat$position), 
                                   levels(draftDat$position)),
                hr(),
-               checkboxInput("includeAvgPoints", "Show league average"))),
+               checkboxInput("includeAvgPoints", "Show league average",
+                             value = TRUE))),
       column(9,
              plotOutput("projectedPoints"))
     )
