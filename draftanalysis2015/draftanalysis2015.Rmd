@@ -1,7 +1,5 @@
 ---
 title: "Jeff Cup Year 10 Draft Analysis"
-author: "James Eddy"
-date: "September 4, 2015"
 output: 
   html_document: 
     theme: flatly
@@ -32,6 +30,20 @@ myCbPal[3] <- "#666666"
 source("functions.R")
 ```
 
+<div style = "font-size:90%;">
+*James Eddy --- September 11, 2015*
+</div>
+
+\  
+
+This year, I decided it would be fun to produce some data-driven content
+throughout the season. As a starting point, I've put together a little analysis
+of our auction draft results. Everything in the report below (including this
+page) was generated in **R**. All code and data are available on 
+**[GitHub](https://github.com/jaeddy/ffb/blob/master/draftanalysis2015)**.
+
+\  
+
 -----
 
 ### The data
@@ -51,6 +63,9 @@ from
 on 9/3/2015 (after adjusting league settings)
 
 Each of the above files (in the versions used below) can be accessed here:
+[https://github.com/jaeddy/ffb/tree/master/draftanalysis2015/data](https://github.com/jaeddy/ffb/tree/master/draftanalysis2015/data)
+
+\  
 
 ##### **Disclaimer:**
 
@@ -97,7 +112,7 @@ other values, I had to do some additional munging and formatting with the data.
 I didn't alter, scale, or weight player data in any way that might bias 
 comparisons between teams. I've left the messy details out here, but you're 
 free to check out the 
-[code](link)
+[code](https://github.com/jaeddy/ffb/blob/master/draftanalysis2015/draftanalysis2015.Rmd)
 , if you want to learn more.
 
 ```{r update_data, cache=TRUE}
@@ -169,6 +184,8 @@ if (!file.exists("draft_data.csv")) {
   draftDat <- read_csv("draft_data.csv")
 }
 ```
+
+\  
 
 ----- 
 
@@ -268,6 +285,8 @@ and the other is/was **Tim Tebow**
 of a risk at the time) --- nobody knows why  
 + Nobody drafted more than 1 kicker --- good job
 
+\  
+
 -----  
 
 ### Spending
@@ -277,12 +296,15 @@ On to more interesting stuff...
 ESPN has a table that shows average auction values for players across all 
 leagues using their system (though I had to actually access these values 
 through the FFA app). While these average values don't take into account
-the specific size and settings of our league*, they provide context for 
-exploring the spending habits of individual owners and the league as a whole.
+the specific size and settings of our league<sup>1</sup>, they provide context
+for exploring the spending habits of individual owners and the league as a 
+whole.
 
-*The auction values listed in the actual online draft app --- which I recall
-were at least a bit closer to what people actually spent --- are impossible
-to find.
+<div style = "font-size:80%;">
+<sup>1</sup>The auction values listed in the actual online draft app --- which 
+I recall were at least a bit closer to what people actually spent --- are 
+impossible to find.
+</div>
 
 ```{r format_draft_cost_data}
 draftCostDat <- draftDat %>% 
@@ -469,6 +491,16 @@ shinyApp(
 
 #### Position spending by owner
 
+If you want to check out how much each owner spent on each position, you can
+take a look at the graph below. The orange bars show how spending at each
+position stacked up against what ESPN users thought the same group of players 
+were worth on average (blue bars). You can also see how much each owner paid
+for positions relative to the rest of the league.
+
+\  
+
+I won't say much about this one, but go ahead and explore for yourself.
+
 ```{r compare_owner_cost_by_position}
 shinyApp(
   ui = fluidPage(
@@ -546,6 +578,9 @@ shinyApp(
 
 #### Individual player spending by owner
 
+This is also fairly self-explanatory --- switch between teams to see how the
+amount paid for individual players compared to ESPN average auction values.
+
 ```{r compare_owner_costs_by_player}
 shinyApp(
   ui = fluidPage(
@@ -596,9 +631,32 @@ shinyApp(
 )
 ```
 
+\  
+
 -----  
 
 ### Projected points
+
+Ah... finally to the most important part: projections!
+
+For each team, I calculated the "optimal" roster --- that is, the combination
+of players that would yield the greatest amount of points for *starters* only,
+based on projections from either ESPN or FFA<sup>2</sup>. Keep in mind, 
+projections here are for *total points* over the course of the season, and 
+don't take into  account week-to-week scoring, matchups, suspensions, bye 
+weeks, etc.
+
+<div style = "font-size:80%;">
+<sup>2</sup>Note: just a reminder that FFA projections are based on a weighted 
+average of several fantasy football sites, including ESPN. One could argue that 
+a "wisdom of the crowds" prediction is likely to be more accurate, but we'll 
+just have to wait and see...
+</div>
+
+\  
+
+The graph below shows how many points each team could hypothetically squeeze
+out of a starting lineup, based on the team they drafted. 
 
 ```{r calculate_optimum_rosters}
 if (file.exists("optimum_rosters.csv")) {
@@ -669,3 +727,21 @@ shinyApp(
 )
 ```
 
+\  
+
+-----
+
+### Conclusions
+
+I'm going to win. The rest of you can suck it. Especially Tony.
+
+\  
+
+----- 
+
+#### **Session info**
+<div style = "font-size:80%;">
+```{r session_info}
+sessionInfo()
+```
+</div>
