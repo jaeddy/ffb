@@ -199,7 +199,7 @@ p <- probs_df %>%
   geom_bar(aes(fill = prob), stat = "identity", alpha = 0.6) +
   facet_wrap(~ team, nrow = 3) +
   scale_x_continuous(breaks = 1:12) +
-  scale_fill_gradient(low = myCbPal[6], high = myCbPal[1], 
+  scale_fill_gradient(low = my_cb_pal[6], high = my_cb_pal[1], 
                       guide = FALSE) +
   theme(strip.text = element_text(size = 12, face = "bold"),
         axis.text.x = element_text(size = 9),
