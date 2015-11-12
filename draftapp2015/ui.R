@@ -93,7 +93,7 @@ shinyUI(fluidPage(
                                textInput("numPicks", label = "Number of picks per slot:",
                                          value = 5))),
                       fluidRow(
-                        column(11,
+                        column(12,
                                strong("Best players within budget"),
                                div(
                                  br(),
@@ -159,7 +159,7 @@ shinyUI(fluidPage(
            tabsetPanel(
              tabPanel("Remaining Players",
                       fluidRow(
-                        column(11,
+                        column(12,
                                br(),
                                div(
                                  dataTableOutput("remainTable"),

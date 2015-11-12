@@ -28,13 +28,14 @@ rosterTable <- bind_rows(rosterList)
 
 # Read and format projections ---------------------------------------------
 
-projections <- read_csv("FFA-Projections-ESPN.csv")
+projections <- read_csv("FFA-Projections-New.csv")
 
 # Format projection data
 projections <- projections %>% 
     dplyr::select(name = playername, position, playerTeam = playerteam,
                   projectedPoints = points, 
-                  pointsLo = lower, pointsHi = upper, risk, 
+                  pointsLo = lower, pointsHi = upper, 
+                  ecr = overallECR, risk, 
                   projectedCost = as.numeric(auctionValue)) %>% 
     filter(pointsHi > 0) %>% 
     mutate(projectedCost = ifelse(projectedCost < 1, 1, projectedCost)) %>% 
@@ -48,7 +49,7 @@ projections <- projections %>%
     mutate(projectedCost = ifelse(position == "QB" & projectedCost < 20 & projectedCost > 3, 
                             projectedCost - 3, projectedCost)) %>% 
     na.omit() %>% 
-    arrange(desc(projectedPoints))
+    arrange(as.numeric(ecr))
 
 
 # Set up initial auction budget -------------------------------------------

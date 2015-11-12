@@ -1,193 +1,193 @@
-"","team","slot","player","position","projPts","paid"
-"1","Kevin","QB","Aaron Rodgers","QB",400.8,47
-"2","Kevin","RB1","Reggie Bush","RB",166.8,30
-"3","Kevin","RB2","C.J. Spiller","RB",165.8,23
-"4","Kevin","WR1","Jordy Nelson","WR",183.1,35
-"5","Kevin","WR2","Riley Cooper","WR",112.6,4
-"6","Kevin","FLEX","Stevan Ridley","RB",142.8,9
-"7","Kevin","TE","Vernon Davis","TE",122.1,12
-"8","Kevin","DST","","",0,0
-"9","Kevin","K","Nick Novak","K",129,1
-"10","Kevin","BENCH1","Philip Rivers","QB",324.2,9
-"11","Kevin","BENCH2","Fred Jackson","RB",131.8,8
-"12","Kevin","BENCH3","","",0,0
-"13","Kevin","BENCH4","","",0,0
-"14","Kevin","BENCH5","","",0,0
-"15","Kevin","BENCH6","","",0,0
-"16","Kevin","BENCH7","","",0,0
-"17","Matt","QB","Matt Ryan","QB",340.9,12
-"18","Matt","RB1","Matt Forte","RB",238.7,61
-"19","Matt","RB2","Zac Stacy","RB",180.7,37
-"20","Matt","WR1","Wes Welker","WR",141.5,20
-"21","Matt","WR2","Anquan Boldin","WR",107.4,3
-"22","Matt","FLEX","Julian Edelman","WR",127.9,9
-"23","Matt","TE","Julius Thomas","TE",150.2,38
-"24","Matt","DST","Kansas City Chiefs","DST",NA,4
-"25","Matt","K","","",0,0
-"26","Matt","BENCH1","","",0,0
-"27","Matt","BENCH2","","",0,0
-"28","Matt","BENCH3","","",0,0
-"29","Matt","BENCH4","","",0,0
-"30","Matt","BENCH5","","",0,0
-"31","Matt","BENCH6","","",0,0
-"32","Matt","BENCH7","","",0,0
-"33","Brad","QB","Peyton Manning","QB",443.5,54
-"34","Brad","RB1","Jamaal Charles","RB",262.8,64
-"35","Brad","RB2","Ryan Mathews","RB",168.8,21
-"36","Brad","WR1","Marques Colston","WR",135.7,7
-"37","Brad","WR2","Antonio Brown","WR",180.8,31
-"38","Brad","FLEX","Rueben Randle","WR",117,4
-"39","Brad","TE","Jordan Cameron","TE",124.5,6
-"40","Brad","DST","","",0,0
-"41","Brad","K","","",0,0
-"42","Brad","BENCH1","","",0,0
-"43","Brad","BENCH2","","",0,0
-"44","Brad","BENCH3","","",0,0
-"45","Brad","BENCH4","","",0,0
-"46","Brad","BENCH5","","",0,0
-"47","Brad","BENCH6","","",0,0
-"48","Brad","BENCH7","","",0,0
-"49","Tony","QB","Tony Romo","QB",340.4,10
-"50","Tony","RB1","LeSean McCoy","RB",253.1,62
-"51","Tony","RB2","Alfred Morris","RB",187,34
-"52","Tony","WR1","Dez Bryant","WR",201.2,40
-"53","Tony","WR2","Michael Floyd","WR",146.3,15
-"54","Tony","FLEX","Lamar Miller","RB",134.9,6
-"55","Tony","TE","","",0,0
-"56","Tony","DST","Cincinnati Bengals","DST",NA,2
-"57","Tony","K","Blair Walsh","K",118.1,1
-"58","Tony","BENCH1","Michael Crabtree","WR",146.7,12
-"59","Tony","BENCH2","Shonn Greene","RB",88.8,5
-"60","Tony","BENCH3","Russell Wilson","QB",326.7,5
-"61","Tony","BENCH4","","",0,0
-"62","Tony","BENCH5","","",0,0
-"63","Tony","BENCH6","","",0,0
-"64","Tony","BENCH7","","",0,0
-"65","Drew","QB","Nick Foles","QB",349.1,10
-"66","Drew","RB1","Le'Veon Bell","RB",200.3,37
-"67","Drew","RB2","DeMarco Murray","RB",207.2,41
-"68","Drew","WR1","DeSean Jackson","WR",141.8,16
-"69","Drew","WR2","Vincent Jackson","WR",167.3,22
-"70","Drew","FLEX","Doug Martin","RB",192.2,38
-"71","Drew","TE","","",0,0
-"72","Drew","DST","New England Patriots","DST",NA,1
-"73","Drew","K","","",0,0
-"74","Drew","BENCH1","Ben Tate","RB",148.3,22
-"75","Drew","BENCH2","Percy Harvin","WR",142.9,23
-"76","Drew","BENCH3","","",0,0
-"77","Drew","BENCH4","","",0,0
-"78","Drew","BENCH5","","",0,0
-"79","Drew","BENCH6","","",0,0
-"80","Drew","BENCH7","","",0,0
-"81","James","QB","Andrew Luck","QB",354.8,16
-"82","James","RB1","Adrian Peterson","RB",237.3,65
-"83","James","RB2","Toby Gerhart","RB",172.8,25
-"84","James","WR1","Julio Jones","WR",194.4,39
-"85","James","WR2","T.Y. Hilton","WR",132.8,13
-"86","James","FLEX","Joique Bell","RB",154.7,13
-"87","James","TE","Greg Olsen","TE",118.1,7
-"88","James","DST","Arizona Cardinals","DST",NA,2
-"89","James","K","Mason Crosby","K",134,2
-"90","James","BENCH1","","",0,0
-"91","James","BENCH2","","",0,0
-"92","James","BENCH3","","",0,0
-"93","James","BENCH4","","",0,0
-"94","James","BENCH5","","",0,0
-"95","James","BENCH6","","",0,0
-"96","James","BENCH7","","",0,0
-"97","Shep","QB","Drew Brees","QB",408.5,46
-"98","Shep","RB1","Ray Rice","RB",152.5,16
-"99","Shep","RB2","Rashad Jennings","RB",160.6,13
-"100","Shep","WR1","Alshon Jeffery","WR",185.7,31
-"101","Shep","WR2","Demaryius Thomas","WR",216.4,44
-"102","Shep","FLEX","","",0,0
-"103","Shep","TE","","",0,0
-"104","Shep","DST","St. Louis Rams","DST",NA,2
-"105","Shep","K","Stephen Gostkowski","K",148.1,2
-"106","Shep","BENCH1","","",0,0
-"107","Shep","BENCH2","","",0,0
-"108","Shep","BENCH3","","",0,0
-"109","Shep","BENCH4","","",0,0
-"110","Shep","BENCH5","","",0,0
-"111","Shep","BENCH6","","",0,0
-"112","Shep","BENCH7","","",0,0
-"113","Milf","QB","Robert Griffin III","QB",341.1,10
-"114","Milf","RB1","Bishop Sankey","RB",161.2,15
-"115","Milf","RB2","Shane Vereen","RB",145.5,14
-"116","Milf","WR1","Keenan Allen","WR",159.1,20
-"117","Milf","WR2","Pierre Garcon","WR",151.4,21
-"118","Milf","FLEX","Victor Cruz","WR",155,18
-"119","Milf","TE","Rob Gronkowski","TE",146.1,26
-"120","Milf","DST","Seattle Seahawks","DST",NA,7
-"121","Milf","K","Dan Carpenter","K",115.8,1
-"122","Milf","BENCH1","Matthew Stafford","QB",355.6,23
-"123","Milf","BENCH2","Torrey Smith","WR",140.6,10
-"124","Milf","BENCH3","Sammy Watkins","WR",124,12
-"125","Milf","BENCH4","Cordarrelle Patterson","WR",149.8,13
-"126","Milf","BENCH5","Jason Witten","TE",120.8,8
-"127","Milf","BENCH6","","",0,0
-"128","Milf","BENCH7","","",0,0
-"129","Toby","QB","Tom Brady","QB",338.2,13
-"130","Toby","RB1","Montee Ball","RB",205.6,44
-"131","Toby","RB2","Andre Ellington","RB",180,27
-"132","Toby","WR1","Golden Tate","WR",124.3,10
-"133","Toby","WR2","Kenbrell Thompkins","WR",48.3,2
-"134","Toby","FLEX","Roddy White","WR",148.3,18
-"135","Toby","TE","Antonio Gates","TE",90.4,1
-"136","Toby","DST","San Francisco 49ers","DST",NA,3
-"137","Toby","K","Adam Vinatieri","K",132.5,1
-"138","Toby","BENCH1","Frank Gore","RB",162.7,21
-"139","Toby","BENCH2","Trent Richardson","RB",147.6,9
-"140","Toby","BENCH3","Larry Fitzgerald","WR",151.5,26
-"141","Toby","BENCH4","Carlos Hyde","RB",86.6,6
-"142","Toby","BENCH5","Joe Flacco","QB",270.8,1
-"143","Toby","BENCH6","","",0,0
-"144","Toby","BENCH7","","",0,0
-"145","Keith","QB","Ben Roethlisberger","QB",309.5,5
-"146","Keith","RB1","Marshawn Lynch","RB",207.9,57
-"147","Keith","RB2","Giovani Bernard","RB",189.5,36
-"148","Keith","WR1","Brandon Marshall","WR",189.1,38
-"149","Keith","WR2","","",0,0
-"150","Keith","FLEX","","",0,0
-"151","Keith","TE","Jimmy Graham","TE",192.8,45
-"152","Keith","DST","Buffalo Bills","DST",NA,1
-"153","Keith","K","Justin Tucker","K",134.3,1
-"154","Keith","BENCH1","","",0,0
-"155","Keith","BENCH2","","",0,0
-"156","Keith","BENCH3","","",0,0
-"157","Keith","BENCH4","","",0,0
-"158","Keith","BENCH5","","",0,0
-"159","Keith","BENCH6","","",0,0
-"160","Keith","BENCH7","","",0,0
-"161","Ross","QB","Jay Cutler","QB",319.7,12
-"162","Ross","RB1","Eddie Lacy","RB",223.1,49
-"163","Ross","RB2","Steven Jackson","RB",131.4,11
-"164","Ross","WR1","A.J. Green","WR",195.7,43
-"165","Ross","WR2","Kenny Britt","WR",84.1,1
-"166","Ross","FLEX","Andre Johnson","WR",158.7,21
-"167","Ross","TE","","",0,0
-"168","Ross","DST","Denver Broncos","DST",NA,3
-"169","Ross","K","Matt Prater","K",134.1,2
-"170","Ross","BENCH1","Colin Kaepernick","QB",336,11
-"171","Ross","BENCH2","Kelvin Benjamin","WR",106.5,3
-"172","Ross","BENCH3","Emmanuel Sanders","WR",132,8
-"173","Ross","BENCH4","Cecil Shorts","WR",117.1,4
-"174","Ross","BENCH5","Darren McFadden","RB",105,1
-"175","Ross","BENCH6","Mike Wallace","WR",136.1,6
-"176","Ross","BENCH7","Maurice Jones-Drew","RB",132.5,7
-"177","Billy","QB","Cam Newton","QB",335.5,25
-"178","Billy","RB1","Arian Foster","RB",198.2,46
-"179","Billy","RB2","Chris Johnson","RB",156.3,9
-"180","Billy","WR1","Calvin Johnson","WR",225.7,52
-"181","Billy","WR2","Sidney Rice","WR",-1.1,1
-"182","Billy","FLEX","Randall Cobb","WR",169.4,26
-"183","Billy","TE","Dennis Pitta","TE",107.5,5
-"184","Billy","DST","Carolina Panthers","DST",NA,3
-"185","Billy","K","Steven Hauschka","K",133.9,1
-"186","Billy","BENCH1","Andy Dalton","QB",303,5
-"187","Billy","BENCH2","Knowshon Moreno","RB",106.7,2
-"188","Billy","BENCH3","Dwayne Bowe","WR",119.2,4
-"189","Billy","BENCH4","Jeremy Maclin","WR",128.5,10
-"190","Billy","BENCH5","","",0,0
-"191","Billy","BENCH6","","",0,0
-"192","Billy","BENCH7","","",0,0
+"","team","slot","player","position","playerTeam","projPts","bidNum","paid"
+"1","Kevin","QB","Drew Brees","NO","QB",355.1,28,22
+"2","Kevin","RB1","Lamar Miller","MIA","RB",180.5,58,37
+"3","Kevin","RB2","Jonathan Stewart","CAR","RB",154.8,71,19
+"4","Kevin","WR1","Calvin Johnson","DET","WR",199.1,27,49
+"5","Kevin","WR2","Demaryius Thomas","DEN","WR",213.8,36,53
+"6","Kevin","FLEX","","","",0,0,0
+"7","Kevin","TE","Dwayne Allen","IND","TE",89.8,80,2
+"8","Kevin","DST","","","",0,0,0
+"9","Kevin","K","","","",0,0,0
+"10","Kevin","BENCH1","","","",0,0,0
+"11","Kevin","BENCH2","","","",0,0,0
+"12","Kevin","BENCH3","","","",0,0,0
+"13","Kevin","BENCH4","","","",0,0,0
+"14","Kevin","BENCH5","","","",0,0,0
+"15","Kevin","BENCH6","","","",0,0,0
+"16","Kevin","BENCH7","","","",0,0,0
+"17","Matt","QB","Ben Roethlisberger","PIT","QB",337.2,89,19
+"18","Matt","RB1","LeSean McCoy","BUF","RB",200.6,23,42
+"19","Matt","RB2","Carlos Hyde","SF","RB",169.1,61,30
+"20","Matt","WR1","A.J. Green","CIN","WR",180.5,38,43
+"21","Matt","WR2","Randall Cobb","GB","WR",187.2,41,45
+"22","Matt","FLEX","Justin Forsett","BAL","RB",187,62,36
+"23","Matt","TE","","","",0,0,0
+"24","Matt","DST","","","",0,0,0
+"25","Matt","K","","","",0,0,0
+"26","Matt","BENCH1","Jeremy Maclin","KC","WR",135.3,87,6
+"27","Matt","BENCH2","","","",0,0,0
+"28","Matt","BENCH3","","","",0,0,0
+"29","Matt","BENCH4","","","",0,0,0
+"30","Matt","BENCH5","","","",0,0,0
+"31","Matt","BENCH6","","","",0,0,0
+"32","Matt","BENCH7","","","",0,0,0
+"33","Brad","QB","Andrew Luck","IND","QB",415,14,47
+"34","Brad","RB1","DeMarco Murray","PHI","RB",204.9,26,55
+"35","Brad","RB2","Chris Ivory","NYJ","RB",133.6,95,13
+"36","Brad","WR1","Emmanuel Sanders","DEN","WR",161.9,52,32
+"37","Brad","WR2","Keenan Allen","SD","WR",139.6,66,16
+"38","Brad","FLEX","Andre Johnson","IND","WR",137.3,82,14
+"39","Brad","TE","","","",0,0,0
+"40","Brad","DST","","","",0,0,0
+"41","Brad","K","","","",0,0,0
+"42","Brad","BENCH1","Philip Rivers","SD","QB",322.6,19,7
+"43","Brad","BENCH2","","","",0,0,0
+"44","Brad","BENCH3","","","",0,0,0
+"45","Brad","BENCH4","","","",0,0,0
+"46","Brad","BENCH5","","","",0,0,0
+"47","Brad","BENCH6","","","",0,0,0
+"48","Brad","BENCH7","","","",0,0,0
+"49","Tony","QB","","","",0,0,0
+"50","Tony","RB1","Adrian Peterson","MIN","RB",236.9,3,59
+"51","Tony","RB2","Joique Bell","DET","RB",138.3,78,13
+"52","Tony","WR1","Alshon Jeffery","CHI","WR",177,44,40
+"53","Tony","WR2","Brandon Marshall","NYJ","WR",135.7,86,10
+"54","Tony","FLEX","Giovani Bernard","CIN","RB",129.3,83,5
+"55","Tony","TE","","","",0,0,0
+"56","Tony","DST","Rams","STL","DST",117.3,101,1
+"57","Tony","K","Connor Barth","DEN","K",132.8,77,1
+"58","Tony","BENCH1","Jarvis Landry","MIA","WR",130.6,94,8
+"59","Tony","BENCH2","Ryan Mathews","PHI","RB",100.2,97,6
+"60","Tony","BENCH3","Ameer Abdullah","DET","RB",130.7,100,11
+"61","Tony","BENCH4","","","",0,0,0
+"62","Tony","BENCH5","","","",0,0,0
+"63","Tony","BENCH6","","","",0,0,0
+"64","Tony","BENCH7","","","",0,0,0
+"65","Drew","QB","Tony Romo","DAL","QB",339,35,11
+"66","Drew","RB1","Matt Forte","CHI","RB",215.6,6,46
+"67","Drew","RB2","C.J. Spiller","NO","RB",138.1,31,10
+"68","Drew","WR1","Odell Beckham","NYG","WR",203.7,11,46
+"69","Drew","WR2","Golden Tate","DET","WR",141.8,70,12
+"70","Drew","FLEX","Alfred Morris","WAS","RB",176,42,35
+"71","Drew","TE","","","",0,0,0
+"72","Drew","DST","","","",0,0,0
+"73","Drew","K","","","",0,0,0
+"74","Drew","BENCH1","Ryan Tannehill","MIA","QB",328.1,84,7
+"75","Drew","BENCH2","Allen Robinson","JAC","WR",125.2,99,4
+"76","Drew","BENCH3","","","",0,0,0
+"77","Drew","BENCH4","","","",0,0,0
+"78","Drew","BENCH5","","","",0,0,0
+"79","Drew","BENCH6","","","",0,0,0
+"80","Drew","BENCH7","","","",0,0,0
+"81","James","QB","Teddy Bridgewater","MIN","QB",292.4,59,2
+"82","James","RB1","Marshawn Lynch","SEA","RB",229.3,16,63
+"83","James","RB2","Todd Gurley","STL","RB",137.1,45,15
+"84","James","WR1","Julio Jones","ATL","WR",204.3,30,47
+"85","James","WR2","Jordan Matthews","PHI","WR",153.2,60,22
+"86","James","FLEX","Frank Gore","IND","RB",173.9,50,20
+"87","James","TE","Antonio Gates","SD","TE",82.9,43,4
+"88","James","DST","Bills","BUF","DST",129.8,39,3
+"89","James","K","Stephen Gostkowski","NE","K",141.1,8,2
+"90","James","BENCH1","Matthew Stafford","DET","QB",323.3,96,4
+"91","James","BENCH2","","","",0,0,0
+"92","James","BENCH3","","","",0,0,0
+"93","James","BENCH4","","","",0,0,0
+"94","James","BENCH5","","","",0,0,0
+"95","James","BENCH6","","","",0,0,0
+"96","James","BENCH7","","","",0,0,0
+"97","Shep","QB","","","",0,0,0
+"98","Shep","RB1","Arian Foster","HOU","RB",113.4,55,16
+"99","Shep","RB2","Joseph Randle","DAL","RB",152.2,74,22
+"100","Shep","WR1","Amari Cooper","OAK","WR",135,63,8
+"101","Shep","WR2","DeAndre Hopkins","HOU","WR",157,69,0
+"102","Shep","FLEX","Davante Adams","GB","WR",122.7,73,17
+"103","Shep","TE","Greg Olsen","CAR","TE",121.5,68,10
+"104","Shep","DST","","","",0,0,0
+"105","Shep","K","Dustin Hopkins","NO","K",109.2,53,25
+"106","Shep","BENCH1","Adam Vinatieri","IND","K",132.6,64,2
+"107","Shep","BENCH2","Latavius Murray","OAK","RB",162.6,76,19
+"108","Shep","BENCH3","Rashad Jennings","NYG","RB",131,85,10
+"109","Shep","BENCH4","LeGarrette Blount","NE","RB",137.6,88,8
+"110","Shep","BENCH5","Isaiah Crowell","CLE","RB",121.5,91,15
+"111","Shep","BENCH6","","","",0,0,0
+"112","Shep","BENCH7","","","",0,0,0
+"113","Milf","QB","Aaron Rodgers","GB","QB",407.7,4,46
+"114","Milf","RB1","LeVeon Bell","PIT","RB",242.1,2,62
+"115","Milf","RB2","Melvin Gordon","SD","RB",171,40,25
+"116","Milf","WR1","Mike Evans","TB","WR",172.5,49,37
+"117","Milf","WR2","Mike Wallace","MIN","WR",124.6,90,4
+"118","Milf","FLEX","","","",0,0,0
+"119","Milf","TE","Martellus Bennett","CHI","TE",111.6,54,8
+"120","Milf","DST","","","",0,0,0
+"121","Milf","K","","","",0,0,0
+"122","Milf","BENCH1","Sam Bradford","PHI","QB",288,48,8
+"123","Milf","BENCH2","","","",0,0,0
+"124","Milf","BENCH3","","","",0,0,0
+"125","Milf","BENCH4","","","",0,0,0
+"126","Milf","BENCH5","","","",0,0,0
+"127","Milf","BENCH6","","","",0,0,0
+"128","Milf","BENCH7","","","",0,0,0
+"129","Toby","QB","Peyton Manning","DEN","QB",369.2,18,25
+"130","Toby","RB1","T.J. Yeldon","JAC","RB",153.4,22,13
+"131","Toby","RB2","Jeremy Hill","CIN","RB",206,29,44
+"132","Toby","WR1","T.Y. Hilton","IND","WR",168.7,47,48
+"133","Toby","WR2","Julian Edelman","NE","WR",143.8,65,16
+"134","Toby","FLEX","Vincent Jackson","TB","WR",132.1,75,7
+"135","Toby","TE","Jason Witten","DAL","TE",104.8,56,5
+"136","Toby","DST","Seahawks","SEA","DST",141.6,32,5
+"137","Toby","K","Steven Hauschka","SEA","K",130.6,20,1
+"138","Toby","BENCH1","Tom Brady","NE","QB",273.7,33,10
+"139","Toby","BENCH2","Matt Ryan","ATL","QB",341.5,37,15
+"140","Toby","BENCH3","Jordan Cameron","MIA","TE",97.5,81,1
+"141","Toby","BENCH4","Patriots","NE","DST",107.3,93,1
+"142","Toby","BENCH5","","","",0,0,0
+"143","Toby","BENCH6","","","",0,0,0
+"144","Toby","BENCH7","","","",0,0,0
+"145","Keith","QB","Cam Newton","CAR","QB",328.5,46,6
+"146","Keith","RB1","Jamaal Charles","KC","RB",237.3,9,62
+"147","Keith","RB2","Andre Ellington","ARI","RB",161.4,79,15
+"148","Keith","WR1","Sammy Watkins","BUF","WR",135.9,12,16
+"149","Keith","WR2","Dez Bryant","DAL","WR",209.9,24,55
+"150","Keith","FLEX","Victor Cruz","NYG","WR",109.9,92,4
+"151","Keith","TE","Jimmy Graham","SEA","TE",140.1,21,32
+"152","Keith","DST","","","",0,0,0
+"153","Keith","K","","","",0,0,0
+"154","Keith","BENCH1","","","",0,0,0
+"155","Keith","BENCH2","","","",0,0,0
+"156","Keith","BENCH3","","","",0,0,0
+"157","Keith","BENCH4","","","",0,0,0
+"158","Keith","BENCH5","","","",0,0,0
+"159","Keith","BENCH6","","","",0,0,0
+"160","Keith","BENCH7","","","",0,0,0
+"161","Ross","QB","","","",0,0,0
+"162","Ross","RB1","Eddie Lacy","GB","RB",234.8,5,60
+"163","Ross","RB2","Mark Ingram","NO","RB",174.5,7,35
+"164","Ross","WR1","Antonio Brown","PIT","WR",222.4,17,48
+"165","Ross","WR2","Brandin Cooks","NO","WR",153.2,57,26
+"166","Ross","FLEX","","","",0,0,0
+"167","Ross","TE","","","",0,0,0
+"168","Ross","DST","","","",0,0,0
+"169","Ross","K","","","",0,0,0
+"170","Ross","BENCH1","","","",0,0,0
+"171","Ross","BENCH2","","","",0,0,0
+"172","Ross","BENCH3","","","",0,0,0
+"173","Ross","BENCH4","","","",0,0,0
+"174","Ross","BENCH5","","","",0,0,0
+"175","Ross","BENCH6","","","",0,0,0
+"176","Ross","BENCH7","","","",0,0,0
+"177","Billy","QB","Russell Wilson","SEA","QB",364.4,10,28
+"178","Billy","RB1","C.J. Anderson","DEN","RB",218.3,15,47
+"179","Billy","RB2","Alfred Blue","HOU","RB",108,98,7
+"180","Billy","WR1","Marques Colston","NO","WR",115.3,34,4
+"181","Billy","WR2","DeSean Jackson","WAS","WR",143.6,51,12
+"182","Billy","FLEX","Malcom Floyd","SD","WR",103.7,67,5
+"183","Billy","TE","Rob Gronkowski","NE","TE",175.8,1,43
+"184","Billy","DST","Texans","HOU","DST",124,25,2
+"185","Billy","K","Dan Bailey","DAL","K",126.9,13,1
+"186","Billy","BENCH1","Jay Cutler","CHI","QB",294.1,72,4
+"187","Billy","BENCH2","","","",0,0,0
+"188","Billy","BENCH3","","","",0,0,0
+"189","Billy","BENCH4","","","",0,0,0
+"190","Billy","BENCH5","","","",0,0,0
+"191","Billy","BENCH6","","","",0,0,0
+"192","Billy","BENCH7","","","",0,0,0

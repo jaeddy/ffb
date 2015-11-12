@@ -3,7 +3,7 @@ library(XML)
 library(dplyr)
 
 leagueURL <- "http://games.espn.go.com/ffl/clubhouse?leagueId=52048"
-season <- 2014
+season <- 2015
 teams <- 1:12
 rosterTable <- data.frame()
 team <- 1
@@ -46,6 +46,7 @@ aff_code = "espn_fantgames",
 cookieDomain = ".go.com",
 multipleDomains = "true",
 
+url <- "https://r.espn.go.com/espn/memberservices/pc/login"
 
 login <- list(
     username = "elstupido85",

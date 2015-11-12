@@ -24,6 +24,23 @@ shinyServer(function(input, output, session) {
       isolate(values$table <- rosterTable)
       isolate(values$ticker <- ticker)
       isolate(values$projections <- projections)
+
+      # update projections
+      isolate(values$projections <- values$projections %>%
+                filter(name != input$player))
+      
+      # update bid number
+      isolate(values$bid <- sum(values$table$player != "") + 1)
+      
+      updateSelectInput(session, "player",
+                        "Player nominated:",
+                        values$projections$name,
+                        selected = values$projections$name[1])
+      updateTextInput(session, "amount",
+                      "Winning bid:", 1)
+      updateSelectInput(session, "draftTeam",
+                        "Highest bidder:",
+                        c(Choose = "", teams))
     }
   })
   
@@ -213,7 +230,10 @@ shinyServer(function(input, output, session) {
     
     get_my_table(values$budgets, values$projections, budgetOpt, maxBid,
                  displaySlots, numPicks, wiggle)
-  }, options = list(pageLength = 10, searching = FALSE)
+  }, options = list(pageLength = 10,
+                    columnDefs = list(list(className = "dt-center",
+                                           targets = c(3:9) - 1, 
+                                           searchable = FALSE)))
   )
   
   # Organize data for viewing team info
@@ -246,7 +266,7 @@ shinyServer(function(input, output, session) {
       rename(team = playerTeam)
   }, options = list(pageLength = 10, 
                     columnDefs = list(list(className = "dt-center",
-                                           targets = c(3:8) - 1, 
+                                           targets = c(3:9) - 1, 
                                            searchable = FALSE)))
   )
   
