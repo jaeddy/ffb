@@ -1,0 +1,65 @@
+---
+title: "#rivals - 2016 edition"
+output: html_notebook
+---
+
+
+```{r setup}
+library(dplyr)
+library(tidyr)
+library(tibble)
+library(purrr)
+library(ggplot2)
+```
+
+
+```{r data_entry}
+choices <- c("James", "Brad", "Kevin", "Shep", "Drew", "Tony", "Milf", 
+             "Keith", "Matt", "Toby", "Ross", "Billy")
+survey_results <- list(
+  Tony = list(James = 1, Brad = 3, Kevin = 6, Shep = 10, Drew = 11, Tony = 12,
+              Milf = 8, Keith = 7, Matt = 2, Toby = 9, Ross = 5, Billy = 4),
+  Billy = list(James = 9, Brad = 6, Kevin = 4, Shep = 10, Drew = 8, Tony = 5,
+               Milf = 7, Keith = 3, Matt = 2, Toby = 12, Ross = 1, Billy = 11),
+  Matt = list(James = 9, Brad = 5, Kevin = 3, Shep = 10, Drew = 8, Tony = 4,
+               Milf = 11, Keith = 12, Matt = 1, Toby = 7, Ross = 6, Billy = 2),
+  Milf = list(James = 10, Brad = 4, Kevin = 5, Shep = 9, Drew = 11, Tony = 7,
+               Milf = 12, Keith = 3, Matt = 6, Toby = 8, Ross = 1, Billy = 2),
+  Toby = list(James = 3, Brad = 1, Kevin = 11, Shep = 5, Drew = 2, Tony = 9,
+               Milf = 10, Keith = 8, Matt = 7, Toby = 12, Ross = 6, Billy = 4),
+  James = list(James = 12, Brad = 4, Kevin = 3, Shep = 2, Drew = 7, Tony = 1,
+               Milf = 9, Keith = 6, Matt = 8, Toby = 5, Ross = 11, Billy = 10),
+  Brad = list(James = 3, Brad = 12, Kevin = 6, Shep = 10, Drew = 1, Tony = 2,
+               Milf = 9, Keith = 7, Matt = 5, Toby = 11, Ross = 4, Billy = 8),
+  Ross = list(James = 9, Brad = 7, Kevin = 5, Shep = 12, Drew = 11, Tony = 6,
+               Milf = 3, Keith = 8, Matt = 4, Toby = 10, Ross = 1, Billy = 2),
+  Keith = list(James = 9, Brad = 3, Kevin = 1, Shep = 4, Drew = NA, Tony = 8,
+               Milf = 7, Keith = NA, Matt = 2, Toby = 6, Ross = 5, Billy = 10),
+  Shep = list(James = 8, Brad = 3, Kevin = 6, Shep = 1, Drew = NA, Tony = 10,
+               Milf = 9, Keith = 2, Matt = 11, Toby = 5, Ross = 12, Billy = 4),
+  Drew = list(James = 7, Brad = 2, Kevin = 4, Shep = 10, Drew = 1, Tony = 3,
+               Milf = 12, Keith = 11, Matt = 8, Toby = 6, Ross = 9, Billy = 5),
+  Kevin = list(James = 7, Brad = 6, Kevin = 12, Shep = 8, Drew = 9, Tony = 3,
+               Milf = 4, Keith = 1, Matt = 2, Toby = 5, Ross = 10, Billy = 11)
+)
+
+rival_df <- map2(survey_results, names(survey_results), function(x, y) {
+  as_tibble(x) %>% 
+    gather(rival, rank) %>% 
+    mutate(owner = y)
+  }) %>% 
+  bind_rows()
+```
+
+```{r}
+rival_df %>% 
+  group_by(rival) %>% 
+  summarise(score = 13 - mean(rank, na.rm = TRUE))
+
+rival_df %>% 
+  group_by(rival) %>% 
+  summarise(score = 13 - mean(rank, na.rm = TRUE)) %>% 
+  ggplot(aes(x = rival, y = score)) +
+  geom_bar(stat = "identity")
+```
+
