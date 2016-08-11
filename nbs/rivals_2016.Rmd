@@ -75,7 +75,7 @@ rival_df <- survey_df %>%
   filter(rival == responder.y) %>% 
   select(-responder.y) %>% 
   rename(rank_received = rank.x, rank_given = rank.y) %>% 
-  mutate(rival_score = 13 - (rank_received + rank_given)/2)
+  mutate(rival_score = (13 - (rank_received + rank_given)/2)/ .12)
 
 glimpse(rival_df)
 ```
@@ -86,11 +86,16 @@ p <- rival_df %>%
   filter(rival <= responder) %>% 
   ggplot(aes(x = rival, y = responder)) +
   geom_tile(aes(fill = rival_score)) +
-  scale_fill_viridis() +
-  theme_bw()
+  scale_fill_viridis("Rival Score") +
+  xlab("") +
+  ylab("") +
+  theme_minimal() +
+  ggtitle("The Hate Map")
 
-ggplotly(p) %>% 
-  plotly::layout(font = list(family = "sans-serif"))
+ggplotly(p) %>%
+  plotly::layout(font = list(family = "Open Sans"))
+# ?scale_fill_brewer
+# p2
 
 ```
 
@@ -101,12 +106,18 @@ rival_norm_df <- rival_df %>%
 ```
 
 ```{r}
-rival_norm_df %>% 
+p <- rival_norm_df %>% 
   filter(rival <= responder) %>% 
   ggplot(aes(x = rival, y = responder)) +
   geom_tile(aes(fill = rival_score)) +
-  scale_fill_viridis(option = "D") +
-  theme_bw()
+  scale_fill_viridis("Rival Score") +
+  xlab("") +
+  ylab("") +
+  theme_minimal() +
+  ggtitle("The Hate Map")
+
+ggplotly(p) %>%
+  plotly::layout(font = list(family = "Open Sans"))
 ```
 
 ```{r}
