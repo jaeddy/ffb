@@ -9,7 +9,10 @@ library(dplyr)
 library(tidyr)
 library(tibble)
 library(purrr)
+library(stringr)
 library(ggplot2)
+library(ggdendro)
+library(viridis)
 ```
 
 
@@ -43,23 +46,98 @@ survey_results <- list(
                Milf = 4, Keith = 1, Matt = 2, Toby = 5, Ross = 10, Billy = 11)
 )
 
-rival_df <- map2(survey_results, names(survey_results), function(x, y) {
+survey_df <- map2(survey_results, names(survey_results), function(x, y) {
   as_tibble(x) %>% 
     gather(rival, rank) %>% 
-    mutate(owner = y)
+    mutate(responder = y)
   }) %>% 
   bind_rows()
+
+glimpse(survey_df)
 ```
 
 ```{r}
-rival_df %>% 
+survey_df %>% 
   group_by(rival) %>% 
   summarise(score = 13 - mean(rank, na.rm = TRUE))
 
-rival_df %>% 
+survey_df %>% 
   group_by(rival) %>% 
   summarise(score = 13 - mean(rank, na.rm = TRUE)) %>% 
   ggplot(aes(x = rival, y = score)) +
   geom_bar(stat = "identity")
+```
+
+
+```{r}
+rival_df <- survey_df %>% 
+  inner_join(survey_df, by = c("responder" = "rival")) %>% 
+  filter(rival == responder.y) %>% 
+  select(-responder.y) %>% 
+  rename(rank_received = rank.x, rank_given = rank.y) %>% 
+  mutate(rival_score = 13 - (rank_received + rank_given)/2)
+
+glimpse(rival_df)
+```
+
+
+```{r}
+p <- rival_df %>% 
+  filter(rival <= responder) %>% 
+  ggplot(aes(x = rival, y = responder)) +
+  geom_tile(aes(fill = rival_score)) +
+  scale_fill_viridis() +
+  theme_bw()
+
+ggplotly(p) %>% 
+  plotly::layout(font = list(family = "sans-serif"))
+
+```
+
+```{r}
+rival_norm_df <- rival_df %>% 
+  mutate(rival_score = ifelse(rival == responder, 0, rival_score)) %>% 
+  replace_na(list(rival_score = 0))
+```
+
+```{r}
+rival_norm_df %>% 
+  filter(rival <= responder) %>% 
+  ggplot(aes(x = rival, y = responder)) +
+  geom_tile(aes(fill = rival_score)) +
+  scale_fill_viridis(option = "D") +
+  theme_bw()
+```
+
+```{r}
+rival_mat <- rival_norm_df %>% 
+  filter(rival <= responder) %>% 
+  select(rival, responder, rival_score) %>% 
+  bind_rows(rival_norm_df %>% 
+              filter(rival < responder) %>% 
+              select(rival = responder, responder = rival, rival_score)) %>% 
+  spread(responder, rival_score) %>% 
+  select(-rival) %>% 
+  as.matrix()
+
+
+dimnames(rival_mat)[[1]] <- dimnames(rival_mat)[[2]]
+12 - rival_mat
+```
+
+```{r}
+rival_clust <- as.dist(12 - rival_mat) %>% 
+  hclust()
+
+rival_clust %>% 
+  ggdendrogram()
+# rival_clust %>% 
+#   as.dendrogram() %>% 
+#   dendro_data(type = "rectangle") %>% 
+#   segment() %>% 
+#   ggplot() +
+#   geom_segment(aes(x = x, y = y, xend = xend, yend = yend)) + 
+#   coord_flip() + 
+#   scale_y_reverse(expand = c(0.2, 0))
 ```
 
