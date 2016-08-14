@@ -1,22 +1,39 @@
 ---
-title: "#rivals - 2016 edition"
-output: html_notebook
+title: '\#rivals - 2016 edition'
+output:
+  html_document: 
+    code_folding: hide
+  html_notebook: default
 ---
 
+# Rivals!
 
-```{r setup}
+For year 11 of the Jefferson Cup fantasy football league, we've agreed to establish official rivalries among pairs of teams. To give some historical context, schedules are randomly generated each year with three consistent features: 1) you play each of the other 5 teams in your division from week 1 to week 5); 2) you play the 6 teams in the other division from week 6 to 11; then 3) your first two matchups are repeated in weeks 11 and 13. Because a lot of crap can go down in week 13 &mdash; teams make the playoffs (or not), playoff seeding is determined, last place penalties are handed down &mdash; your opponent that week can have a big influence on the outcome of your season. On top of that, you already played them in week 2, so there's a good chance someone already holds a grudge. This creates a natural, if entirely unofficial and mostly contrived, rivalry for that season*.
+
+*one could argue that the week 1 and 12 matchup could also constitute a rivaly, but that would be dumb.
+
+Going into the current season, team owners were asked to rank their fellow league members from 1st (biggest rival) to 12th (most benign), based on whatever past transgressions, perceived slights, imagined feuds, or other arbitrary criteria they felt was appropriate. I've tallied the responses, and you can read about the results below!
+
+All of the R code used to tabulate results and generate graphics is embedded in this post, if you're curious.
+
+```{r setup, message=FALSE}
+options(scipen = 1, digits = 2)
+
+# loading packages
 library(dplyr)
 library(tidyr)
 library(tibble)
 library(purrr)
 library(stringr)
 library(ggplot2)
+library(plotly)
 library(ggdendro)
+library(qgraph)
+library(networkD3)
 library(viridis)
-```
 
-
-```{r data_entry}
+# SurveyMonkey apparently makes you pay to export responses in any sort of 
+# usable format, so I had to enter everything manually...
 choices <- c("James", "Brad", "Kevin", "Shep", "Drew", "Tony", "Milf", 
              "Keith", "Matt", "Toby", "Ross", "Billy")
 survey_results <- list(
@@ -46,43 +63,78 @@ survey_results <- list(
                Milf = 4, Keith = 1, Matt = 2, Toby = 5, Ross = 10, Billy = 11)
 )
 
+# some additionally formatting to get the data in a workable structure
 survey_df <- map2(survey_results, names(survey_results), function(x, y) {
   as_tibble(x) %>% 
     gather(rival, rank) %>% 
     mutate(responder = y)
   }) %>% 
   bind_rows()
-
-glimpse(survey_df)
 ```
 
-```{r}
-survey_df %>% 
-  group_by(rival) %>% 
-  summarise(score = 13 - mean(rank, na.rm = TRUE))
+## Who do we hate most? (spoiler: it's Brad)
 
-survey_df %>% 
+The first thing I can do is to simply tally up the rankings for each person. I'll assign a score to each owner, based on the average ranks given by all other owners. A higher score = more people ranked you towards the top of the rival list; a lower score = people generally think you're irrelevant. Scores can theoretically range from 0 to 100 (cause maths).
+
+```{r plot_rivaltude, fig.align='center', fig.width=8.5}
+# function to rescale ranks
+norm_0to1 <- function(x) {
+  (x - min(x, na.rm = TRUE)) / (max(x, na.rm = TRUE) - min(x, na.rm = TRUE))
+}
+
+# get summary stats per rival
+summary_df <- survey_df %>% 
+  mutate(norm_rank = 1 - norm_0to1(rank)) %>% 
   group_by(rival) %>% 
-  summarise(score = 13 - mean(rank, na.rm = TRUE)) %>% 
-  ggplot(aes(x = rival, y = score)) +
-  geom_bar(stat = "identity")
+  summarise(mean_rank = mean(rank, na.rm = TRUE),
+            rivaltude = mean(norm_rank, na.rm = TRUE) * 100)
+
+# create ggplot barplot object
+p1 <- summary_df %>% 
+  ggplot(aes(x = rival, y = rivaltude)) +
+  geom_bar(stat = "identity", fill = "slategray", alpha = 0.8) +
+  scale_fill_viridis() +
+  xlab("") + 
+  ylab("Overall Rivaltude") +
+  theme_minimal()
+
+# convert to plotly
+ggplotly(p1) %>%
+  plotly::layout(font = list(family = "Open Sans"))
 ```
 
+While Matt was a close second, Brad is the winner (?) in terms of overall "rivaltude" &mdash; his score of **`r filter(summary_df, rival == "Brad") %>% .[["rivaltude"]]`** corresponds to an average assigned rank of **`r filter(summary_df, rival == "Brad") %>% .[["mean_rank"]]`** out of 12. This should not be a surprise to anyone. Brad's pretty much the worst... In contrast, Milf's score of **`r filter(summary_df, rival == "Milf") %>% .[["rivaltude"]]`** corresponds to an average ranking of **`r filter(summary_df, rival == "Milf") %>% .[["mean_rank"]]`**. Most of the league either really likes Milf, or doesn't feel threatened by him whatsoever.
 
-```{r}
+**NOTE:** These results are slightly biased, because several people decided to be clever and rank themselves as their biggest rival. For the sake of this particular graph though, I'm not too worried about it &mdash; if you think you're your own worst enemy, I don't see any reason why that vote shouldn't count.
+
+**OTHER NOTE:** Neither Keith nor Shep provided a response for Drew. These **`NA`s** might have been intended as the lowest possible rank (i.e., no rivalry whatsoever), which would have lowered Drew's overall score a bit. However, I'm not going to adjust things just because people don't know how to use a survey.
+
+## Quantifying enmnity
+
+Figuring out who we all dislike (on average) is interesting, but the real question is who dislikes *each other* most. Each potential rival (i.e., one of the 12 possible survey choices) nominally received a ranking from each of the other 11 owners. In turn, each rival also gave a ranking to each of the other owners. By pairing owners up and looking at their recipricol rankings, we can start to see which couples really belong together.
+
+For example, if Brad ranked Drew 1st, and Drew ranked Brad 1st, the average ranking between them is 1 &mdash; indicating a perfect rival match. If Billy ranked Matt 12th, but Matt ranked Billy 1st.. well, for one, it'd be a little awkward, cause there are obviously some mixed signals getting sent.. but their average ranking would be 6 &mdash; making them unlikely to be true rivals. I calculated these average recipricol rankings for each pair of owners and re-scaled the values to get a "rival score" between 0 and 100. Higher scores indicate that both you and the other owner ranked each other closer to 1st; lower scores indicate you both ranked each other close to 12th; scores in the middle could either mean you both gave middling ranks or that there was a big discrepancy in ranks given.
+
+To make my life simpler, I assigned a rival score of **0** for every owner with himself &mdash; even for those people who ranked themselves first. I also replaced missing ranks with 12s.
+
+If you've ever looked at a heatmap before, I've taken advantage of the convenient anagram and dubbed this graph the "HateMap". Brighter colors mean MOAR RIVALNESS.
+
+```{r, fig.align='center', fig.width=8.5}
+# calculate recipricol rival scores
 rival_df <- survey_df %>% 
   inner_join(survey_df, by = c("responder" = "rival")) %>% 
   filter(rival == responder.y) %>% 
   select(-responder.y) %>% 
   rename(rank_received = rank.x, rank_given = rank.y) %>% 
-  mutate(rival_score = (13 - (rank_received + rank_given)/2)/ .12)
+  replace_na(list(rank_received = 12, rank_given = 12)) %>% 
+  mutate(norm_rank_received = 1 - norm_0to1(rank_received),
+         norm_rank_given = 1 - norm_0to1(rank_given),
+         rival_score = ((norm_rank_received + norm_rank_given) / 2) * 100,
+         rival_score = ifelse(rival == responder, 0, rival_score))
 
-glimpse(rival_df)
-```
 
-
-```{r}
-p <- rival_df %>% 
+# create ggplot heatmap object
+p2 <- rival_df %>% 
   filter(rival <= responder) %>% 
   ggplot(aes(x = rival, y = responder)) +
   geom_tile(aes(fill = rival_score)) +
@@ -90,65 +142,161 @@ p <- rival_df %>%
   xlab("") +
   ylab("") +
   theme_minimal() +
-  ggtitle("The Hate Map")
+  ggtitle('The HateMap')
 
-ggplotly(p) %>%
-  plotly::layout(font = list(family = "Open Sans"))
-# ?scale_fill_brewer
-# p2
-
-```
-
-```{r}
-rival_norm_df <- rival_df %>% 
-  mutate(rival_score = ifelse(rival == responder, 0, rival_score)) %>% 
-  replace_na(list(rival_score = 0))
-```
-
-```{r}
-p <- rival_norm_df %>% 
-  filter(rival <= responder) %>% 
-  ggplot(aes(x = rival, y = responder)) +
-  geom_tile(aes(fill = rival_score)) +
-  scale_fill_viridis("Rival Score") +
-  xlab("") +
-  ylab("") +
-  theme_minimal() +
-  ggtitle("The Hate Map")
-
-ggplotly(p) %>%
+ggplotly(p2) %>%
   plotly::layout(font = list(family = "Open Sans"))
 ```
 
-```{r}
-rival_mat <- rival_norm_df %>% 
+Some obvious matchups jump out here: Tony-James and Keith-Kevin both ended up with scores of 100, while Ross-Billy and Brad-Drew were pretty close. Still, relying on visual inspection of a bunch of numbers and colors to figure things out is for chumps. Let's try more science!
+
+## Not a clusterf!#@, just clusters
+
+Getting a little technical here, but the rival scores I calculated above are basically "similarity" measures, indicating how closely you and another owner align in terms of potential for rivalry. Taking the inverse of these similarity measures gives us pairwise *distances*, which is the input for most data clustering algorithms. In this case, I'll just use a pretty simple technique called hierarchical clustering to automatically group owners.
+
+Results of the cluster analysis are shown in the tree (or dendrogram) below. As you follow the tree from bottom to top, teams are succesively "linked" up based on their rival score. In cases where two teams are already linked in a branch, and a third team gets connected at a higher branch point, this grouping is based on the *average* rival score between the third team and *both* of the linked teams.
+
+```{r, fig.align='center', fig.width=8.5}
+# create distance matrix
+rival_mat <- rival_df %>% 
   filter(rival <= responder) %>% 
   select(rival, responder, rival_score) %>% 
-  bind_rows(rival_norm_df %>% 
+  bind_rows(rival_df %>% 
               filter(rival < responder) %>% 
               select(rival = responder, responder = rival, rival_score)) %>% 
   spread(responder, rival_score) %>% 
   select(-rival) %>% 
   as.matrix()
 
-
 dimnames(rival_mat)[[1]] <- dimnames(rival_mat)[[2]]
-12 - rival_mat
-```
 
-```{r}
-rival_clust <- as.dist(12 - rival_mat) %>% 
+# compute hierarchical clusters
+rival_clust <- as.dist(100 - rival_mat) %>% 
   hclust()
 
-rival_clust %>% 
-  ggdendrogram()
-# rival_clust %>% 
-#   as.dendrogram() %>% 
-#   dendro_data(type = "rectangle") %>% 
-#   segment() %>% 
-#   ggplot() +
-#   geom_segment(aes(x = x, y = y, xend = xend, yend = yend)) + 
-#   coord_flip() + 
-#   scale_y_reverse(expand = c(0.2, 0))
+# plot dendrogram
+rival_clust %>%
+  ggdendrogram() +
+  ggtitle("Rival Tree") +
+  theme(axis.text.x = element_text(family = "Open Sans", size = 10),
+        plot.title = element_text(family = "Open Sans"))
 ```
+
+Again, the more obvious matchups shake out pretty easily. However, now I can also get a better sense of what the "next best" set of rivalries might be. Whlie the Shep-Toby matchup is admittedly less strong and a little surprising, it turns out that they're the best fit for each other (especially because Keith is already taken...). Interestingly, both Matt and Milf are each grouped more closely to *pairs* of teams than they are to each other or any other individual team. This is again likely because what might have been reasonably strong matchups for each of them (e.g., Milf-Ross or Matt-Kevin) weren't quite as strong as the top pairings. Matt and Milf's rival score is actually only **`r filter(rival_df, rival == "Matt", responder == "Milf") %>% .[["rival_score"]]`**, which is kinda disappointing.
+
+```{r, message=FALSE}
+# extract rival pairs from clustering output
+rival_pairs <- cutree(rival_clust, 6, 50) %>% 
+  as.data.frame() %>% 
+  rownames_to_column("owner1") %>% 
+  rename_("pair" = ".") %>% 
+  mutate(pair = ifelse(owner1 == "Milf", 5, pair)) %>% 
+  group_by(pair) %>% 
+  mutate(owner2 = list(owner1)) %>% 
+  ungroup() %>% 
+  unnest(owner2) %>% 
+  filter(owner1 != owner2) %>% 
+  select(-pair) %>% 
+  rename(rival = owner1, responder = owner2)
+
+# get stats for rival pairs
+rival_stats <- left_join(rival_pairs, rival_df) %>% 
+  filter(rival <= responder) %>% 
+  summarise(mean_score = mean(rival_score),
+            min_score = min(rival_score))
+```
+
+## Maybe a bit of a clusterf!#@...
+
+Doing a quick check, I can see that the average rival score taking the 6 pairs in this configuration is **`r rival_stats[["mean_score"]]`**. Not terrible, but not awesome. (As an aside, hierarchical clustering algorithms are not designed to produce any sort of "globally optimal" groupings &mdash; but I'll save that discussion for anyone that's more curious). To see what the clustering looks at with a little bit of tweaking, I downweighted any high, but not perfect rival scores: that is, for the Brad-Drew and Ross-Billy matchups, I adjusted scores from ~95 down to 90 and recomputed the clustering tree.
+
+```{r, fig.align='center', fig.width=8.5, message=FALSE}
+# create modified distance matrix
+rival_mat_new <- rival_mat
+rival_mat_new[rival_mat_new > 90 & rival_mat_new < 100] = 90
+
+# compute hierarchical clusters
+rival_clust_new <- as.dist(100 - rival_mat_new) %>% 
+  hclust()
+
+# plot dendrogram
+rival_clust_new %>%
+  ggdendrogram() +
+  ggtitle("Rival Tree") +
+  theme(axis.text.x = element_text(family = "Open Sans", size = 10),
+        plot.title = element_text(family = "Open Sans"))
+
+# extract rival pairs from clustering output
+rival_pairs_new <- cutree(rival_clust_new, 6) %>% 
+  as.data.frame() %>% 
+  rownames_to_column("owner1") %>% 
+  rename_("pair" = ".") %>% 
+  group_by(pair) %>% 
+  mutate(owner2 = list(owner1)) %>% 
+  ungroup() %>% 
+  unnest(owner2) %>% 
+  filter(owner1 != owner2) %>% 
+  select(-pair) %>% 
+  rename(rival = owner1, responder = owner2)
+
+# get stats for rival pairs
+rival_stats_new <- left_join(rival_pairs_new, rival_df) %>% 
+  filter(rival <= responder) %>% 
+  summarise(mean_score = mean(rival_score),
+            min_score = min(rival_score))
+```
+
+By loosening up the "attraction" between Billy and Ross a bit, we end up with two new pairings: Milf-Ross and Billy-Matt; everything else stayed the same. With this setup, the minimum rival score is now **`r rival_stats_new[["min_score"]]`** and the average is up to **`r rival_stats_new[["mean_score"]]`**. The dropoffs in individual scores for each of the new matchups is pretty minimal, and I think both could be entertaining. The Shep-Toby matchup is still a bit weak, but maybe it can be the start of something great?
+
+## Networks &mdash; 'cause why not?
+
+The graphic below doesn't really add any information, but I thought it would be fun to make anyway. The diameter of each node is proportional to the "rivaltude" score from the first graph above. The length of each connecting edge is (nominally) inversely proportional to rival score: closer proximity in the network indicates stronger rivals. Due to the way the network gets drawn, the distance between nodes isn't always a perfect translation of rival score &mdash; I've also set the width of each edge to scale with rival score, so thicker lines also means stronger rivals. Have some fun playing around with the diagram.
+
+```{r, fig.width=8.5, fig.height=8.5, message=FALSE}
+# use qgraph to build network
+q <- qgraph(rival_mat, layout = 'spring', DoNotPlot = TRUE, vsize = 10)
+
+# create & format links/edges objects for graphing
+links <- q$Edgelist %>% 
+  as.data.frame() %>% 
+  select(-directed, -bidirectional) %>% 
+  mutate(from = from - 1,
+         to = to - 1) 
+
+nodes <- data_frame(rival = names(q$graphAttributes$Nodes$labels)) %>% 
+  mutate(group = 1) %>% 
+  left_join(summary_df,
+            by = c("rival" = "rival")) %>% 
+  rename(score = rivaltude) %>% 
+  mutate(score = score - mean(score),
+         score = score - min(score) + 1)
+
+# plot network with networkD3 function
+forceNetwork(links, nodes, Source = "from", Target = "to", Value = "weight", 
+             NodeID = "rival", Nodesize = "score", Group = "score", 
+             linkDistance = JS("function(d){return (101 - d.value) * 8}"),
+             linkWidth = JS("function(d){return Math.pow((d.value / 20), 2)}"),
+             linkColour = "#50A6C2",
+             radiusCalculation = JS("d.nodesize + 10"),
+             fontSize = 12, fontFamily = "Open Sans", 
+             opacity = 0.6, opacityNoHover = 1,
+             charge = 0)
+```
+
+## Conclusions
+
+Your 2016 rivalries, based on the data (and some minor adjustments) are as follows:
+
++ **Kevin-Keith**
++ **James-Tony**
++ **Brad-Drew**
++ **Billy-Matt**
++ **Milf-Ross**
++ **Shep-Toby**
+
+Now I just need to figure out how to build a schedule around all of this. That might be an interesting topic for a follow-up post...
+
+Also, this was a massive time sink that didn't help me prepare for the actual draft or season whatsoever. Crap.
+
+
 
