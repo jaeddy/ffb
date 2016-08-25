@@ -4,6 +4,21 @@ library(reshape2)
 library(rCharts)
 library(stringr)
 
+add_player_to_roster <- function(rosterTable, playerPacket) {
+  openSlots <- rosterTable %>% 
+    filter(team == playerPacket$team, player == "")
+  openRow <- openSlots %>% 
+    filter(str_detect(slot, playerPacket$position)) %>% 
+    slice(1)
+  playerRow <- full_join(openRow, playerPacket) %>% 
+    fill(slot) %>% 
+    filter(player != "")
+  rosterTable %>% 
+    filter(team != playerRow$team | slot != playerRow$slot) %>% 
+    bind_rows(playerRow) %>% arrange(team)
+}
+
+
 get_table_idx <- function(rosterTable, team_idx, pos) {
   slot_idx <- team_idx & rosterTable$player == "" &
     grepl(pos, rosterTable$slot)

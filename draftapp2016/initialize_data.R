@@ -59,7 +59,7 @@ load_projections <- function(projection_file) {
            projectedCost = ifelse(position == "QB" & projectedCost < 20 
                                   & projectedCost > 3, 
                                   projectedCost - 3, projectedCost),
-           draftedBy =) %>% 
+           draftedBy = "") %>% 
     arrange(as.numeric(ecr))
 }
 
@@ -93,7 +93,7 @@ get_current_budget <- function(budgets, budgetOpt = NULL) {
   }
 }
 
-budgets <- init_budgets(budgets_file)
+budgets <- init_budgets(budgets_file, budget)
 curBudget <- get_current_budget(budgets)
 
 
