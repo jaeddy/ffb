@@ -1,6 +1,7 @@
 
 # Load packages -----------------------------------------------------------
 
+library(plyr)
 library(dplyr)
 library(reshape2)
 library(ggplot2)
@@ -25,10 +26,10 @@ teams <- c("James", "Brad", "Drew", "Matt", "Kevin", "Billy", "Shep", "Milf",
 divisions <- c("A", "A", "B", "A", "B", "B", "B", "B", "A", "A", "A", "B")
 
 # CURRENT RECORDS
-weeks_completed <- 9
+weeks_completed <- 11
 record_df <- data_frame(team = teams, 
                         division = divisions,
-                        wins = c(3, 7, 7, 3, 4, 0, 7, 4, 3, 5, 5, 6),
+                        wins = c(5, 8, 9, 3, 5, 2, 7, 4, 3, 5, 7, 8),
                         ties = 0) %>% 
   mutate(losses = weeks_completed - wins - ties)
 
@@ -55,7 +56,7 @@ w13_df <- data_frame(home = c("Tony", "Toby", "Keith", "Kevin", "Billy", "Ross")
                      week = "week13")
 
 # putting everything together
-sched_df <- bind_rows(list(w10_df, w11_df, w12_df, w13_df))
+sched_df <- bind_rows(list(w12_df, w13_df))
 
 
 # Define functions --------------------------------------------------------
@@ -122,8 +123,9 @@ get_ranking <- function(final_record_df) {
   final_record_df %>% 
     group_by(division) %>% 
     top_n(1, desc(rank)) %>% 
-    arrange(rank) %>% 
-    
+    ungroup() %>% 
+    arrange(desc(wins)) %>% 
+
     # recombine with the remaining teams
     bind_rows(anti_join(final_record_df, .) %>% 
                 arrange(rank)) %>% 
@@ -210,6 +212,6 @@ p <- probs_df %>%
 p
 
 # save to png file
-ggsave("/Users/jaeddy/Desktop/sim_standings.png", p,
+ggsave("/Users/jaeddy/Desktop/sim_standings_w11.png", p,
        width = 8, height = 6)
 
