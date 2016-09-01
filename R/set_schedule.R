@@ -4,111 +4,126 @@ library(tidyr)
 library(stringr)
 library(purrr)
 
-team <- c("James", "Brad", "Drew", "Matt", "Kevin", "Billy", "Shep", "Milf",
+teams <- c("James", "Brad", "Drew", "Matt", "Kevin", "Billy", "Shep", "Milf",
            "Keith", "Toby", "Tony", "Ross")
-division <- c("A", "B", "B", "A", "B", "A", "A", "B", "B", "A", "A", "B")
-rivalry_num <- c(1, 4, 4, 2, 5, 2, 3, 6,
-               5, 3, 1, 6)
+divisions <- c("A", "B", "B", "A", "B", "A", "A", "B", "B", "A", "A", "B")
+rivalry_nums <- c(1, 4, 4, 2, 5, 2, 3, 6,
+                 5, 3, 1, 6)
 
-team_df <- tibble(team, division, rivalry_num)
 
-schedule_template <- tribble(
-  ~week, ~teamA, ~teamB,
-  1,     3,      1,
-  1,     4,      2,
-  1,     6,      5,
-  1,     10,     8,
-  1,     7,      9,
-  1,     12,     11,
-  2,     4,      3,
-  2,     1,      5,
-  2,     2,      6,
-  2,     11,     7,
-  2,     9,      10,
-  2,     8,      12,
-  3,     2,      1,
-  3,     5,      3,
-  3,     6,      4,
-  3,     7,      8,
-  3,     11,     9,
-  3,     12,     10,
-  4,     5,      2,
-  4,     1,      4,
-  4,     3,      6,
-  4,     11,     8,
-  4,     7,      10,
-  4,     9,      12,
-  5,     6,      1,
-  5,     2,      3,
-  5,     4,      5,
-  5,     8,      9,
-  5,     10,     11,
-  5,     7,      12,
-  6,     12,     1,
-  6,     11,     2,
-  6,     9,      4,
-  6,     8,      5,
-  6,     7,      6,
-  6,     3,      10,
-  7,     2,      7,
-  7,     6,      8,
-  7,     3,      9,
-  7,     1,      10,
-  7,     5,      11,
-  7,     4,      12,
-  8,     8,      1,
-  8,     10,     2,
-  8,     12,     3,
-  8,     7,      4,
-  8,     9,      5,
-  8,     6,      11,
-  9,     8,      2,
-  9,     11,     3,
-  9,     10,     4,
-  9,     12,     5,
-  9,     9,      6,
-  9,     1,      7,
-  10,    9,      1,
-  10,    8,      3,
-  10,    10,     6,
-  10,    5,      7,
-  10,    4,      11,
-  10,    2,      12,
-  11,    12,     6,
-  11,    3,      7,
-  11,    4,      8,
-  11,    2,      9,
-  11,    5,      10,
-  11,    1,      11,
-  12,    3,      1,
-  1,     4,      2,
-  12,    6,      5,
-  12,    10,     8,
-  12,    7,      9,
-  12,    12,     11,
-  13,    4,      3,
-  1,     1,      5,
-  13,    2,      6,
-  13,    11,     7,
-  13,    9,      10,
-  13,    8,      12
-)
+get_schedule <- function(team, division, rivalry_num, draft_date) {
+  set.seed(draft_date)
+  team_df <- tibble(team, division, rivalry_num) %>% 
+    group_by(division) %>% 
+    mutate(rr = sample(seq(min(rivalry_num),
+                           max(rivalry_num)))[dense_rank(rivalry_num)]) %>% 
+    ungroup()
+  
+  schedule_template <- tribble(
+    ~week, ~teamA, ~teamB,
+    1,     3,      1,
+    1,     4,      2,
+    1,     6,      5,
+    1,     10,     8,
+    1,     7,      9,
+    1,     12,     11,
+    2,     4,      3,
+    2,     1,      5,
+    2,     2,      6,
+    2,     11,     7,
+    2,     9,      10,
+    2,     8,      12,
+    3,     2,      1,
+    3,     5,      3,
+    3,     6,      4,
+    3,     7,      8,
+    3,     11,     9,
+    3,     12,     10,
+    4,     5,      2,
+    4,     1,      4,
+    4,     3,      6,
+    4,     11,     8,
+    4,     7,      10,
+    4,     9,      12,
+    5,     6,      1,
+    5,     2,      3,
+    5,     4,      5,
+    5,     8,      9,
+    5,     10,     11,
+    5,     7,      12,
+    6,     12,     1,
+    6,     11,     2,
+    6,     9,      4,
+    6,     8,      5,
+    6,     7,      6,
+    6,     3,      10,
+    7,     2,      7,
+    7,     6,      8,
+    7,     3,      9,
+    7,     1,      10,
+    7,     5,      11,
+    7,     4,      12,
+    8,     8,      1,
+    8,     10,     2,
+    8,     12,     3,
+    8,     7,      4,
+    8,     9,      5,
+    8,     6,      11,
+    9,     8,      2,
+    9,     11,     3,
+    9,     10,     4,
+    9,     12,     5,
+    9,     9,      6,
+    9,     1,      7,
+    10,    9,      1,
+    10,    8,      3,
+    10,    10,     6,
+    10,    5,      7,
+    10,    4,      11,
+    10,    2,      12,
+    11,    12,     6,
+    11,    3,      7,
+    11,    4,      8,
+    11,    2,      9,
+    11,    5,      10,
+    11,    1,      11,
+    12,    3,      1,
+    1,     4,      2,
+    12,    6,      5,
+    12,    10,     8,
+    12,    7,      9,
+    12,    12,     11,
+    13,    4,      3,
+    1,     1,      5,
+    13,    2,      6,
+    13,    11,     7,
+    13,    9,      10,
+    13,    8,      12
+  )
+  
+  rivalry_week = schedule_template %>% 
+    filter(week == 2) %>% 
+    mutate(rivalry = row_number())
+  
+  team_df <- team_df %>% 
+    group_by(rivalry_num) %>% 
+    mutate(number = rivalry_week %>% 
+             filter(rivalry == rr) %>% 
+             select(teamA, teamB) %>% 
+             flatten_dbl() %>% 
+             sample())
+  
+  schedule_df <- schedule_template %>% 
+    left_join(team_df, by = c("teamA" = "number")) %>% 
+    left_join(team_df, by = c("teamB" = "number"), suffix = c("A", "B"))
+  
+  return(schedule_df %>% 
+           select(week, 
+                  teamA = teamAA, divisionA,
+                  teamB = teamBB, divisionB))
+}
 
-rivalry_week = schedule_template %>% 
-  filter(week == 2) %>% 
-  mutate(rivalry = row_number())
-
-team_df <- team_df %>% 
-  group_by(rivalry_num) %>% 
-  mutate(number = rivalry_week %>% 
-           filter(rivalry == rivalry_num) %>% 
-           select(teamA, teamB) %>% 
-           flatten_dbl() %>% 
-           sample())
-
-schedule_df <- schedule_template %>% 
-  left_join(team_df, by = c("teamA" = "number")) %>% 
-  left_join(team_df, by = c("teamB" = "number"), suffix = c("A", "B"))
+schedule2016 <- get_schedule(teams, divisions, rivalry_nums, "20160827")
 
 # randomize_schedule <- function(teams, divisions, rivalries) {
 #   set.seed(0)
