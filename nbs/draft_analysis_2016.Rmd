@@ -1,0 +1,183 @@
+---
+title: "2016 Draft Analysis"
+output:
+  html_document: 
+    code_folding: hide
+  html_notebook: default
+---
+
+# 2016 Draft Analysis
+
+```{r setup, message=FALSE}
+options(scipen = 1, digits = 2)
+
+# loading packages
+library(dplyr)
+library(readr)
+library(stringr)
+library(tidyr)
+library(tibble)
+library(forcats)
+library(purrr)
+library(stringr)
+library(ggplot2)
+library(plotly)
+library(ggthemes)
+library(viridis)
+```
+
+```{r}
+ggplot2::theme_set(theme_bw())
+scale_fill_discrete <- function(...) scale_fill_colorblind(...)
+scale_fill_continuous <- function(...) scale_fill_viridis(...)
+scale_colour_discrete <- function(...) scale_color_colorblind(...)
+scale_colour_continuous <- function(...) scale_color_viridis(...)
+```
+
+
+```{r}
+roster2015_df <- read_csv("../data/2015_draft_data.csv")
+```
+
+```{r, warning=FALSE}
+library(readxl)
+draft_df <- read_excel("../data/2016 Draft Results.xlsx", 
+                       col_names = TRUE, skip = 1) %>% 
+  .[1:192, 2:5] %>% 
+  rename(bidNumber = Count,
+         player = `Drafted Player`,
+         owner = Manager,
+         cost = Cost)
+```
+
+```{r, warning=FALSE, message=FALSE}
+projections_df <- read_csv("../data/2016-08-25-FFA-CustomRankings.csv") %>% 
+  select(-playerId, -player, -actualPoints, -cost, -salary, -sleeper)
+```
+
+```{r}
+dst_name_regex <- projections_df %>% 
+  filter(position == "DST") %>% 
+  select(playername) %>% 
+  flatten_chr() %>% 
+  str_c(collapse = "|")
+
+str_uniform <- function(x) {
+  x <- str_to_upper(x)
+  str_replace_all(x, " |\\.|'|(J|S)R", "")
+}
+
+draft_key_df <- draft_df %>% 
+  mutate(player = ifelse(str_detect(player, dst_name_regex),
+                         str_extract(player, dst_name_regex),
+                         player)) %>% 
+  mutate(playerkey = str_uniform(player))
+
+projections_key_df <- projections_df %>% 
+              mutate(playerkey = str_uniform(playername))
+
+roster2016_df <- left_join(draft_key_df, projections_key_df) %>% 
+  filter(!(playername == "David Johnson" & position == "TE")) %>% 
+  mutate(position = fct_relevel(position, "QB", "RB", "WR", "TE", "DST", "K"),
+         cost = parse_number(cost),
+         auctionValue = parse_number(auctionValue)) %>% 
+  replace_na(list(auctionValue =  0))
+```
+
+```{r}
+label <- paste0("<b>Owner:</b> %s<br>",
+                "<b>Position:</b> %s<br>",
+                "<b>Count:</b> %s")
+
+p <- roster2016_df %>% 
+  group_by(owner, position) %>% 
+  summarise(positionCount = n()) %>% 
+  select(owner, position, positionCount) %>% 
+  bind_rows(roster2016_df %>% 
+              group_by(position) %>% 
+              summarise(positionCount = n() / 12) %>% 
+              mutate(owner = "Average")) %>% 
+  ggplot(aes(x = owner, y = positionCount)) +
+  geom_bar(aes(fill = position, 
+               text = sprintf(label, 
+                              owner, position, positionCount)), 
+           stat = "identity", 
+           alpha = 0.8, colour = "slategray") +
+  xlab("Owner") +
+  ylab("Position count")
+
+ggplotly(p, tooltip = "text") %>%
+  plotly::layout(font = list(family = "Open Sans"))
+```
+
+```{r}
+label <- paste0("<b>Player:</b> %s<br>",
+                "<b>Owner:</b> %s<br>",
+                "<b>ESPN avg. cost:</b> $%s<br>",
+                "<b>JeffCup cost:</b> $%s")
+p <- roster2016_df %>% 
+  mutate(costDiff = cost - auctionValue) %>% 
+  ggplot(aes(x = auctionValue, y = cost)) +
+  geom_abline(intercept = 0, slope = 1,
+              size = 1, linetype = 2, alpha = 0.5) +
+  geom_smooth(aes(text = auctionValue)) +
+  geom_point(aes(colour = costDiff, label = position,
+                 text = sprintf(label, 
+                                playername, owner, auctionValue, cost)),
+             alpha = 0.8, size = 3) +
+  scale_color_viridis(end = 0.95) +
+  xlab("JeffCup cost") +
+  ylab("ESPN avg. cost") +
+  guides(color = FALSE)
+
+ggplotly(p, tooltip = "text") %>%
+  plotly::layout(font = list(family = "Open Sans"))
+
+```
+
+
+```{r}
+label <- paste0("<b>Owner:</b> %s<br>",
+                "<b>Position:</b> %s<br>",
+                "<b>Cost:</b> $%s<br>",
+                "<b>Count:</b> %s")
+
+p <- roster2016_df %>% 
+  group_by(owner, position) %>% 
+  summarise(positionCost = sum(cost),
+            positionCount = n()) %>% 
+  select(owner, position, positionCost, positionCount) %>% 
+  bind_rows(roster2016_df %>% 
+              group_by(position) %>% 
+              summarise(positionCost = sum(cost) / 12,
+                        positionCount = n() / 12) %>% 
+              mutate(owner = "Average")) %>% 
+  ggplot(aes(x = owner, y = positionCost)) +
+  geom_bar(aes(fill = position, 
+               text = sprintf(label, 
+                              owner, position, positionCost, positionCount)), 
+           stat = "identity",
+           alpha = 0.8, colour = "slategray") +
+  xlab("Owner") +
+  ylab("Position cost")
+
+ggplotly(p, tooltip = "text") %>%
+  plotly::layout(font = list(family = "Open Sans"))
+```
+
+
+
+```{r calculate_optimum_rosters, include=FALSE, eval=FALSE}
+if (file.exists("optimum_rosters.csv")) {
+  optRosters <- read_csv("optimum_rosters.csv")
+} else {
+  optRostersFFA <- optimize_rosters(draftDat, "ffaPoints") %>% 
+    mutate(pointSource = "FFA")
+  optRostersESPN <- optimize_rosters(draftDat, "espnPoints") %>% 
+    mutate(pointSource = "ESPN")
+  optRosters <- bind_rows(optRostersFFA, optRostersESPN)
+  write_csv(optRosters, "optimum_rosters.csv")
+}
+```
+
+
