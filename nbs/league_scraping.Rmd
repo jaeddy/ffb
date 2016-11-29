@@ -1,0 +1,128 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(RSelenium)
+library(tidyverse)
+library(rvest)
+library(janitor)
+library(stringr)
+```
+
+```{bash}
+docker run -d -p 4445:4444 -p 5901:5900 -e no_proxy=localhost selenium/standalone-firefox-debug
+```
+
+```{r, include=FALSE}
+remDr <- remoteDriver(port = 4445L)
+remDr$open()
+remDr$setImplicitWaitTimeout(milliseconds = 1000)
+```
+
+
+```{r}
+schedule_url <- "http://games.espn.com/ffl/schedule?leagueId=52048"
+season_url <- paste0(schedule_url, "&seasonId=2016")
+season_url
+
+remDr$navigate(season_url)
+```
+
+```{r}
+```
+
+```{r}
+login_elem <- remDr$findElement(using = "id", value = "disneyid-iframe")
+remDr$switchToFrame(login_elem)
+input_elems <- remDr$findElements(using = "xpath", value = "//input")
+
+input_elems[[1]]$sendKeysToElement(list("james.a.eddy@gmail.com"))
+input_elems[[2]]$sendKeysToElement(list("**PASSWORD**"))
+
+button_elem <- remDr$findElements(using = "class name", value = "btn")
+button_elem[[1]]$clickElement()
+```
+
+```{r}
+remDr$navigate(season_url)
+```
+
+```{r}
+schedule_html <- read_html(remDr$getPageSource()[[1]])
+
+schedule_df <- schedule_html %>% 
+  html_node(".tableBody") %>% 
+  html_table()
+```
+
+```{r}
+schedule_tidy_df <- schedule_df %>% 
+  select(-X3) %>%
+  set_names(.[2, ]) %>%
+  clean_names() %>% 
+  rename(away_owner = owner_s, home_owner = owner_s_2) %>% 
+  mutate(week = ifelse(str_detect(result, "WEEK"), 
+                       parse_number(result),
+                       NA)) %>% 
+  fill(week) %>%
+  filter(str_detect(result, "(Box|Preview|(\\d+\\-\\d+))")) %>% 
+  mutate(result = str_replace(result, "(Box|Preview)", "0.0-0.0"),
+         away_team = str_replace(away_team, " \\(\\d.*", ""),
+         home_team = str_replace(home_team, " \\(\\d.*", "")) %>% 
+  separate(result, c("away_score", "home_score"), sep = "-") %>% 
+  mutate(away_score = parse_double(away_score),
+         home_score = parse_double(home_score)) %>% 
+  I
+
+```
+
+```{r}
+owners_url <- "http://games.espn.com/ffl/leaguesetup/ownerinfo?leagueId=52048"
+remDr$navigate(paste0(owners_url, "&seasonId=2016"))
+```
+
+```{r}
+owners_html <- read_html(remDr$getPageSource()[[1]])
+
+owners_df <- owners_html %>% 
+  html_node(".tableBody") %>% 
+  html_table()
+```
+
+```{r}
+owners_tidy_df <- owners_df %>% 
+  clean_names() %>% 
+  select(team_name, division, owner_name) %>%
+  filter(str_detect(team_name, "[[:alnum:]]")) %>% 
+  I
+```
+
+```{r}
+x <- owners_tidy_df %>% 
+  # select(-owner_name) %>% 
+  group_by(owner_name, division) %>% 
+  nest() %>% 
+  mutate(data = purrr::map(data, function(x) {
+    x %>% 
+      left_join(schedule_tidy_df, by = c("team_name" = "away_team")) %>% 
+      bind_rows(x %>%
+                  left_join(schedule_tidy_df,
+                            by = c("team_name" = "home_team"))) %>%
+      mutate(win = ifelse(is.na(away_team), 
+                          away_score > home_score,
+                          away_score < home_score),
+             tie = away_score == home_score) %>% 
+      summarise(wins = sum(win & !(tie)),
+                ties = sum(tie),
+                losses = sum(away_score > 0) - wins) %>% 
+      I
+  })) %>% 
+  unnest(data) %>% 
+  arrange(division, desc(wins)) %>% 
+I 
+x
+# x$team_record
+```
+
