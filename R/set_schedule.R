@@ -4,20 +4,26 @@ library(tidyr)
 library(stringr)
 library(purrr)
 
-teams <- c("James", "Brad", "Drew", "Matt", "Kevin", "Billy", "Shep", "Milf",
-           "Keith", "Toby", "Tony", "Ross")
-divisions <- c("A", "B", "B", "A", "B", "A", "A", "B", "B", "A", "A", "B")
-rivalry_nums <- c(1, 4, 4, 2, 5, 2, 3, 6,
-                 5, 3, 1, 6)
+# teams_2016 <- c("James", "Brad", "Drew", "Matt", "Kevin", "Billy", "Ryan", "Milf",
+#                 "Keith", "Toby", "Tony", "Ross")
+# divisions_2016 <- c("A", "B", "B", "A", "B", "A", "A", "B", "B", "A", "A", "B")
+# rivalry_nums_2016 <- c(1, 4, 4, 2, 5, 2, 3, 6,
+#                        5, 3, 1, 6)
 
+teams_2017 <- c("Billy", "Brad", "Drew", "James", "Keith", "Kevin", 
+                "Matt", "Milf", "Ross", "Ryan", "Toby", "Tony")
+divisions_2017 <- c("A", "B", "B", "B", "A", "A", "A", "A", "A", "B", "B", "B")
+rivalry_nums_2017 <- c(1, 2, 2, 3, 4, 4, 1, 5, 5, 6, 6, 3)
 
 get_schedule <- function(team, division, rivalry_num, draft_date) {
   set.seed(draft_date)
   team_df <- tibble(team, division, rivalry_num) %>% 
-    group_by(division) %>% 
-    mutate(rr = sample(seq(min(rivalry_num),
-                           max(rivalry_num)))[dense_rank(rivalry_num)]) %>% 
-    ungroup()
+    group_by(division) %>%
+    mutate(div_rivalry_num = dense_rank(rivalry_num),
+           rr = sample(seq(1, 3))[dense_rank(div_rivalry_num)]) %>% 
+    ungroup() %>% 
+    mutate(rr = ifelse(division == "B", rr + 3, rr))
+  team_df
   
   schedule_template <- tribble(
     ~week, ~teamA, ~teamB,
@@ -101,7 +107,7 @@ get_schedule <- function(team, division, rivalry_num, draft_date) {
     13,    8,      12
   )
   
-  rivalry_week = schedule_template %>% 
+  rivalry_week <- schedule_template %>% 
     filter(week == 2) %>% 
     mutate(rivalry = row_number())
   
@@ -123,7 +129,10 @@ get_schedule <- function(team, division, rivalry_num, draft_date) {
                   teamB = teamBB, divisionB))
 }
 
-schedule2016 <- get_schedule(teams, divisions, rivalry_nums, "20160827")
+# schedule2016 <- get_schedule(teams, divisions_2016, rivalry_nums, "20160827")
+schedule2017 <- get_schedule(teams_2017, divisions_2017, rivalry_nums_2017, 
+                             "20170902")
+
 
 # randomize_schedule <- function(teams, divisions, rivalries) {
 #   set.seed(0)

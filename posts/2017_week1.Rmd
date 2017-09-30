@@ -1,0 +1,210 @@
+---
+title: ""
+output: 
+  html_notebook: 
+    code_folding: none
+    theme: flatly
+---
+
+```{r, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(DT)
+library(stringr)
+library(glue)
+source("../R/fetch_powerrankings.R")
+knitr::opts_chunk$set(echo=FALSE, warning=FALSE, message=FALSE)
+```
+
+\  
+
+I'm trying a slightly new format for LM notes this year... I found out that you can embed HTML from a remote site, which provides a bit more flexibility in the types and format of content I can use. We'll see how it goes.
+
+> **ALSO:** It's RIVALRY WEEK. So, fuck Tony.
+
+## Week 1 Power Rankings
+
+```{r}
+pr_week1 <- get_powerrankings(2017, 1, data_dir = "../data")
+```
+
+Before we get to my predictions for the season, here are some power rankings I generated using a tool (read: Excel spreadsheet) that I found <a href="https://www.reddit.com/r/fantasyfootball/comments/6y08cr/gators_2017_ff_power_ranking_spreadsheet_for_use/" target="_blank">on the interwebs</a>. Column descriptions paraphrased from the creator of the tool:
+
++ **PO [playoff odds*]**: This is not used in any kind of determination of Power Rankings, but is copied from <a href="https://www.fantasypros.com/" target="_blank">FantasyPros</a> and displayed for shits and giggles. From the author: "*I currently use FPros for this, but am not super happy with it. They incorporate roster strength into it, which I don't want. FPros also does not take league setup like divisions and wildcards into account. I want just a straight up probability without anything subjective. if someone knows of a service that offers that, please let me know! But for now, I'll continue to use what I've got.*"
++ **RECORD:** Pretty self explanatory. You can find out more about how everything gets weighted at the link above.
++ **OVERALL WINS:** This is what your record would be if you played every team every week (basically, how your score stacks up against everyone else). 
++ **PPG:** Points scored per game (and corresponding league rank in that category).
++ **R.O.S. ROSTER:** Rest-of-season roster strength, relative to the rest of the league. This is also copied from FantasyPros.
+
+
+\* **editorial note:** these aren't odds, they're probabilities — might try to fix in a later edition
+
+```{r}
+pr_week1 %>% 
+  select(-Δ, -CONS, -`POWER                             RANK                           SCORE`) %>% 
+    datatable(escape = FALSE, rownames = FALSE, height = 750,
+            options=list(
+              scrollY = TRUE,
+              ordering = FALSE,
+              pageLength = 12,
+              dom = 't',
+              initComplete = JS("
+                                function(settings, json) {
+                                  $(this.api().table().body()).css({
+                                    'font-family': 'Roboto, Open Sans, sans-serif',
+                                    'font-size': '13px'
+                                  });
+                                  $(this.api().table().header()).css({
+                                    'font-family': 'Roboto, Open Sans, sans-serif',
+                                    'font-size': '14px'
+                                  });
+                                  $(this.api().table().container()).css({
+                                    'font-family': 'Roboto, Open Sans, sans-serif',
+                                    'font-size': '14px'
+                                  });
+                                }
+                                ")
+            )
+  ) %>% 
+  formatStyle(c("TEAM NAME", "POWER RANK", "RECORD", "OVERALL WINS"), textAlign = "center")
+```
+
+\  
+
+-----
+
+## Pre-season(ish) Predictions
+
+Onto the main event...
+
+I could choose to blame my lack of pre-season predictions on the cluster-f of events and travel leading up to President Wagner’s wedding… but really I’m just lazy. Besides, everyone’s outlook for the season is much more interesting — and forecasts much more informed — with one week of games in the books.
+
+With that said, here are your entirely non-scientific predictions for Jefferson Cup Year 12:
+
+```{r, message=FALSE, warning=FALSE}
+drew <- tibble(Owner = "Drew",
+               `Predicted Record` = "3-10",
+               Analysis = glue("Drew was drafting in what appeared to be a very clean, quiet environment, without any distractions or Totinos. With all that extra focus... well, I'm not really sure what happened. Drew was really excited about TY Hilton, which is surprising, given that he's never had the guy on a team before (and oh yeah, Luck is dead). His top 4 RBs included a suspended Doug Martin, the now irrelevant McFadden, and the probably-should-retire-already Forte. Gordon and OBJ should be solid, but aside from them, it's gonna be tough putting together a decent lineup most weeks. Maybe having Katie in the room and dreaming about his pending nuptials in a week was enough to get in Drew's head, or maybe Tyrod Taylor will actually be good this year. I'm going with the former.
+
+
+<b>Week 1 bonus note:</b> Drew pulled off the baller move of getting married, starting an inactive star WR, and winning his first matchup against Toby."))
+
+james <- tibble(Owner = "James",
+                `Predicted Record` = "4-9",
+                Analysis = glue("James started off strong in this year's draft, but got too conservative later on and missed out on several mid-tier players who could have really complemented a core of David Johnson, Russell Wilson, and Doug Baldwin. Now that DJ is out for weeks / the season, and the Seahawks offense seems inept, the lack of depth is even more apparent... and painful. At least he drafted Frank Gore. Still, James has a history of being one of the most active league members in terms of trades and the waiver wire — so he should be able to scrape together enough moves to avoid the marathon. It's a pretty exciting change in priorities for what looked like a reasonably solid team coming out of the draft.
+
+
+<b>Week 1 bonus note:</b> With a 2nd championship likely off the table, James now has nothing better to do than create stupid posts for the league and talk about himself in the 3rd person."))
+
+tony <- tibble(Owner = "Tony",
+               `Predicted Record` = "4-9",
+               Analysis = glue("Tony apparently decided to go with the unconventional '0 RB' strategy this year — at least that seems like a fair description for the fearsome stable that is Isaiah Crowell, Jonathan Stewart, and Terrance West. His WR/TE situation on the other hand looks nasty, so he might not need much production from RBs after all. Fortunately, most of his team (including Julio, Michael Thomas, and Kelce) shat the bed in Week 1. Mixing in a dash of personal bias, it's safe to say that none of these players are likely to bounce back, and Tony's team is destined for mediocrity. You like that??
+
+
+<b>Week 1 bonus note:</b> Tarik Cohen is tite. It's gonna be fun to watch Tony pick whom to bench each week out of Crowell/West/Stewart/Cohen/Garcon and inevitably make the wrong decisions."))
+
+milf <- tibble(Owner = "Milf",
+               `Predicted Record` = "5-8",
+               Analysis = glue("Milf either continues to struggle with the auction draft format, or is just ahead of his time when it comes to strategy. Either way, Milf’s teams have a tendency to raise eyebrows. This year, he targeted last year's biggest bust along with a rookie who may or may not start anytime soon — oh yeah, and two of the top 3 TEs. This team should be interesting to watch, if nothing else. However, if week one is any indication, Milf will need Brees and Evan (probably Gronklsen too) to play well / play at all or things might get ugly.
+
+
+<b>Week 1 bonus note:</b> Mike Evans on an unexpected bye is a reasonable excuse for starting Corey Davis at WR for Week 1; there's no excuse for starting both Davis and Tyler Lockett at the same time."))
+
+brad <- tibble(Owner = "Brad",
+               `Predicted Record` = "6-7",
+               Analysis = glue("Brad was super excited about his team during and immediately after the draft — which was cute, if misguided. While there's some upside (maybe Matt Ryan gets over his PTSD and has another good year; maybe Cooks is the closest thing to the next Randy Moss.. catching balls from a 40 year old Brady), the rest is underwhelming. Now Brad appears to be dealing with his perennial problem of not having any RBs.. but in the abysmal Atlantic Division, who knows what could happen.
+
+
+<b>Week 1 bonus note:</b> The most exciting thing to happen for Brad's team this week was Tyreek Hill, who was on his bench."))
+
+toby <- tibble(Owner = "Toby",
+               `Predicted Record` = "7-6",
+               Analysis = "Like several of the past seasons, Toby's team coming out of the draft is not particularly remarkable. While his Week 1 struggles didn't do much to counter the 'meh', he might have some bright spots moving forward: Freeman and Cooper should be tite, and Dalvin Cook looks like the next coming of Kareem Hunt. Fitz might be more valuable now too, as he'll pretty much have to carry the Cardinals offense. His post-draft proclamations of winning the league this year are still dubious, but Toby could be a sneaky contender (see above comment about Atlantic Division).
+
+
+<b>Week 1 bonus note:</b> I almost forgot to write a Week 1 note for Toby. He lost to Drew, which if you've been paying any attention so far, is not a good thing. I imagine things will go better in the future when he doesn't sit his 2nd best RB who ran for 127 yards in his first professional football game.")
+
+ross <- tibble(Owner = "Ross",
+               `Predicted Record` = "7-6",
+               Analysis = glue("Ross accidentally took a nap during the draft and tragically missed out on Eddie Lacy. Attempting to course correct, he then went all in on Lacy's former team as well as his own Panthers (but hey, those homer picks are looking better than Seattle right now...). In spite of an especially sorry matchup in which both teams scored less than 70 and Ross lost by less than a point, there's a decent chance that several guys bounce back and do well this season. Or not, whatever.
+
+
+<b>Week 1 bonus note:</b> Ross actually watched all of the Week 1 games from Brad's house, despite rumors that he was in Petoskey and/or Zilwaukee."))
+
+keith <- tibble(Owner = "Keith",
+                `Predicted Record` = "7-6",
+                Analysis = glue("Who the fuck shows up to an auction draft with only a cell phone? In spite of the sort of technical incompetence I would normally expect from someone like Tony, Keith* might have assembled a half decent team. While Jordan Howard might lose some touches to Cohen this year, he and Kareem Hunt still make for one of the better RB duos in the league. Perhaps the biggest question about Keith* this season is whether his hard-on for Tom Brady and current/former Washington Football Team WRs culminates in a satisfying nut or... whatever it feels like to still be a Washington Football Team fan.
+
+
+<b>Week 1 bonus note:</b> Keith* got 40+ points from a running back and still lost to Billy."))
+
+kevin <- tibble(Owner = "Kevin",
+                `Predicted Record` = "8-5",
+                Analysis = glue("Kevin overcame Brad's spotty wifi and his own Keith-esque bidding malfunction to draft what looks like a pretty good team. He even managed to eke out a[n ugly] win with his top RB sidelined by Hurricane Irma (in other sad news, Fournette might be real tite). With Ajayi and Winston back — and Andy Dalton maybe remembering how to play quarterback — Kevin has a good shot to compete in a tough division. Will it be enough, though, to avoid another crushing defeat in the championship like last year?
+
+
+<b>Week 1 bonus note:</b> Both Dak Prescott and Leonard Fournette scored exactly 18.4 points — that’s mildly interesting."))
+
+shep <- tibble(Owner = "Shep",
+               `Predicted Record` = "9-4",
+               Analysis = glue("Shep managed to draft from his phone, in a car, while moving into a new home, after a HURRICANE hit his town, and somehow experienced fewer technical difficulties than Keith and Kevin. Of course, the big story was Zeke. While he didn't get that much of a discount in the end, Shep getting to use Zeke all season would transform his team from pretty good to powerhouse. And that will just be annoying for everyone.
+
+
+<b>Week 1 bonus note:</b> Dickstomping of the Week award goes to Shep, which in fairness, would have gone to pretty much anyone who had played James."))
+
+billy <- tibble(Owner = "Billy",
+                `Predicted Record` = "9-4",
+                Analysis = glue("After blowing most of his budget on Shady, AP, and Hyde (who might have been the steal of the draft), Billy quietly did... not much else. That might have been enough though, especially if Stafford can put up more games like last week. The rest of Billy's team is mostly scrubs and backups, so the margin for error here is tight. Still, this is a team worth rooting for... if for no other reason than it'd be less depressing than Matt, Shep, or Kevin winning another championship.
+
+
+<b>Week 1 bonus note:</b> Not only did Billy rack up an impressive win this week, he successfully demonstrated what some suspected all along — that Allan Robinson and Eddie Lacy weren't worth drafting."))
+
+matt <- tibble(Owner = "Matt",
+               `Predicted Record` = "9-4",
+               Analysis = glue("Matt's draft strategy, while apparently very similar to James’, was executed with much better results. After landing one of the top 2 RBs, Matt grabbed a couple solid WR2s, then bided his time. When everyone else was down to pennies, Matt threw his remaining budget around like the giant Federer penis he dreams of, nabbing 2 more starting RBs and a potential top 10 QB for relatively cheap. Without any real holes, Matt looks like the team to beat this year.
+
+
+<b>Week 1 bonus note:</b> Le’veon Bell didn't die. I bet that was nice."))
+
+
+prediction_df <- bind_rows(drew, james, tony, milf, brad, toby, 
+                           ross, kevin, keith, shep, billy, matt) %>% 
+  mutate(wins = as.integer(str_extract(`Predicted Record`, ".*(?=-)"))) %>% 
+  arrange(wins) %>% 
+  select(-wins) %>% 
+  mutate(Analysis = str_replace(Analysis, "\n", "<br/><br/>"),
+         Owner = str_c("<b>", Owner, "</b>"))
+```
+
+```{r}
+prediction_df %>%
+  datatable(escape = FALSE, rownames = FALSE, height = 2800,
+            options=list(
+              scrollY = TRUE,
+              ordering = FALSE,
+              pageLength = 12,
+              dom = 't',
+              initComplete = JS("
+                                function(settings, json) {
+                                  $(this.api().table().body()).css({
+                                    'font-family': 'Roboto, Open Sans, sans-serif',
+                                    'font-size': '13px'
+                                  });
+                                  $(this.api().table().header()).css({
+                                    'font-family': 'Roboto, Open Sans, sans-serif',
+                                    'font-size': '14px'
+                                  });
+                                  $(this.api().table().container()).css({
+                                    'font-family': 'Roboto, Open Sans, sans-serif',
+                                    'font-size': '14px'
+                                  });
+                                }
+                                ")
+            )
+  ) %>% 
+  formatStyle(c("Owner", "Predicted Record"), textAlign = "center")
+```
+
+-----
+
+
+
