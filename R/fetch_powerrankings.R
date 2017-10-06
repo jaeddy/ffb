@@ -32,3 +32,21 @@ get_powerrankings <- function(year, week, data_dir = "data") {
     select(-WEEK)
 }
 
+read_trends <- function(year, data_dir = "data") {
+  pr_spreadsheet_path <- glue("~/Dropbox/MyDocuments/Fantasy Football/{year} Jeff Cup Power Rankings.xlsx",
+                              year = year)
+  list(roster_strength = "B2:S14", power_rank = "V2:AM14") %>% 
+    map_df(function(table_range) {
+      read_xlsx(pr_spreadsheet_path, 
+                sheet = "TRENDS", range = table_range) %>% 
+        set_names(c("Team", names(.)[-1])) %>% 
+        gather(week, rank, -Team) %>% 
+        mutate(week = ifelse(week == "PS", "PRE SEASON", week),
+               week = stringr::str_replace_all(week, " ", ""),
+               week = stringr::str_replace_all(week, "W", "WEEK "))
+        
+    }, 
+    .id = "trend_type")
+}
+read_trends(2017)
+
