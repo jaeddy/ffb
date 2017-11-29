@@ -1,0 +1,171 @@
+---
+title: "Jefferson Cup 2017 — Week 11 Dashboard"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    vertical_layout: fill
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(tidyverse)
+library(stringr)
+library(ggplot2)
+library(ggthemes)
+library(plotly)
+library(DT)
+library(stringr)
+library(glue)
+source("../R/fetch_powerrankings.R")
+knitr::opts_chunk$set(echo=FALSE, warning=FALSE, message=FALSE)
+
+custom_theme_bw <- function() {
+    theme_bw() +
+        theme(axis.title = element_text(face = "bold"),
+              legend.title = element_text(face = "bold"),
+              plot.title = element_text(face = "bold"))
+}
+```
+
+Power Rankings
+=====================================  
+
+Row 
+-----------------------------------------------------------------------
+
+### **Rankings & Stats**
+
+```{r}
+pr_week7 <- get_powerrankings(2017, 11, data_dir = "../data")
+```
+
+```{r}
+pr_week7 %>% 
+  arrange(`POWER                             RANK                           SCORE`) %>% 
+  select(-Δ, -CONS, -`POWER                             RANK                           SCORE`) %>% 
+  rename(`Playoff Prob.` = `PO Odds`, Team = `TEAM NAME`, 
+         `Power Rank` = `POWER RANK`, Record = RECORD, 
+         `Overall Record` = `OVERALL WINS`, 
+         `Roster Strengh` = `R.O.S. ROSTER`) %>% 
+  mutate(`Playoff Prob.` = glue::glue("{prob}%", 
+                                      prob = `Playoff Prob.` * 100),
+         PPG = map_chr(PPG, function(x) {str_split(x, ",") %>% 
+             flatten_chr() %>% 
+             rev() %>% 
+             str_c(collapse = " (") %>% 
+             str_c(")")
+           }),
+         PPG = str_replace(PPG, "ppg", "")) %>% 
+  datatable(escape = FALSE, rownames = FALSE,
+            options=list(
+              scrollY = TRUE,
+              ordering = FALSE,
+              pageLength = 12,
+              dom = 't',
+              initComplete = JS("
+                                function(settings, json) {
+                                  $(this.api().table().body()).css({
+                                    'font-family': 'Roboto, Open Sans, sans-serif',
+                                    'font-size': '11px'
+                                  });
+                                  $(this.api().table().header()).css({
+                                    'font-family': 'Roboto, Open Sans, sans-serif',
+                                    'font-size': '12px'
+                                  });
+                                  $(this.api().table().container()).css({
+                                    'font-family': 'Roboto, Open Sans, sans-serif',
+                                    'font-size': '12px'
+                                  });
+                                }
+                                ")
+            )
+  ) %>% 
+  formatStyle(c("Team", "Power Rank", "Record", "Overall Record"), textAlign = "center")
+```
+
+Row 
+-----------------------------------------------------------------------
+
+### Column Key
+
+```{r}
+tribble(
+  ~Column, ~Description,
+  "Team", 'Best attempt to get everyone\'s team name correct. Stop changing your team names, assholes.',
+  "Power Rank", 'Current power rank, calculated based on <b><a href="https://www.reddit.com/r/fantasyfootball/comments/6y08cr/gators_2017_ff_power_ranking_spreadsheet_for_use/" target="_blank">this spreadsheet</a></b> I found on reddit.',
+  "Playoff Prob.",  '("Prob." is short for "Probability") This is not used in any kind of determination of Power Rankings, but is copied from <a href="https://www.fantasypros.com/" target="_blank">FantasyPros</a> and displayed for shits and giggles. From the author: "*I currently use FPros for this, but am not super happy with it. They incorporate roster strength into it, which I don\'t want. FPros also does not take league setup like divisions and wildcards into account. I want just a straight up probability without anything subjective. if someone knows of a service that offers that, please let me know! But for now, I\'ll continue to use what I\'ve got.',
+  "Record", 'Pretty self explanatory. You can find out more about how everything gets weighted at the link above.',
+  "Overall Record", 'This is what your record would be if you played every team every week (basically, how your score stacks up against everyone else).',
+  "PPG", 'Points scored per game (and corresponding league rank in that category).',
+  "Roster Strength", 'Rest-of-season roster strength, relative to the rest of the league. This is also copied from FantasyPros.'
+) %>% 
+  datatable(escape = FALSE, rownames = FALSE, height = 2800,
+            options=list(
+              scrollY = TRUE,
+              ordering = FALSE,
+              pageLength = 12,
+              dom = 't',
+              initComplete = JS("
+                                function(settings, json) {
+                                  $(this.api().table().body()).css({
+                                    'font-family': 'Roboto, Open Sans, sans-serif',
+                                    'font-size': '11px'
+                                  });
+                                  $(this.api().table().header()).css({
+                                    'font-family': 'Roboto, Open Sans, sans-serif',
+                                    'font-size': '12px'
+                                  });
+                                  $(this.api().table().container()).css({
+                                    'font-family': 'Roboto, Open Sans, sans-serif',
+                                    'font-size': '12px'
+                                  });
+                                }
+                                ")
+            )
+  )
+```
+
+
+Trends
+=====================================  
+
+Row
+-----------------------------------------------------------------------
+
+### **Power Rank Trends**
+
+```{r}
+trends_df <- read_trends(2017) %>% 
+  mutate(week = forcats::fct_inorder(week))
+
+current_order <- trends_df %>% 
+  filter(week == "WEEK 9", trend_type == "power_rank") %>% 
+  arrange(rank) %>% 
+  .[["Team"]]
+```
+
+```{r}
+p <- trends_df %>% 
+  filter(trend_type == "power_rank",
+         !is.na(rank)) %>% 
+  mutate(Team = factor(Team, levels = current_order),
+         ttip = glue::glue("<b>{team}</b>\n{week} rank: <b>{rank}</b>",
+                            team = Team, rank = rank, week = str_to_title(week))) %>% 
+  ggplot2::ggplot(aes(x = as.numeric(week), y = rank)) +
+  geom_line(aes(colour = Team)) +
+  geom_point(aes(colour = Team, text = ttip)) +
+  scale_colour_viridis_d() +
+  scale_x_continuous(breaks = 1:12,
+                     labels = levels(trends_df$week)[1:12],
+                     limits = c(1, 12)) +
+  scale_y_reverse(breaks = 1:12) +
+  ylab("Power Rank") +
+  xlab("") +
+  guides(colour = FALSE) +
+  custom_theme_bw() +
+  theme(axis.text.x = element_text(angle = -15, hjust = 0))
+# p
+ggplotly(p, tooltip = "text")
+```
+
+

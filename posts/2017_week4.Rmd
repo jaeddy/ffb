@@ -1,0 +1,110 @@
+---
+title: "Jefferson Cup 2017 — Week 4 Dashboard"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    vertical_layout: fill
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(tidyverse)
+library(stringr)
+library(ggplot2)
+library(ggthemes)
+library(plotly)
+library(DT)
+library(stringr)
+library(glue)
+source("../R/fetch_powerrankings.R")
+knitr::opts_chunk$set(echo=FALSE, warning=FALSE, message=FALSE)
+
+custom_theme_bw <- function() {
+    theme_bw() +
+        theme(axis.title = element_text(face = "bold"),
+              legend.title = element_text(face = "bold"),
+              plot.title = element_text(face = "bold"))
+}
+```
+
+Row
+-----------------------------------------------------------------------
+
+### Power Rankings
+
+```{r}
+pr_week4 <- get_powerrankings(2017, 4, data_dir = "../data")
+```
+
+```{r}
+pr_week4 %>% 
+  select(-Δ, -CONS, -`POWER                             RANK                           SCORE`) %>% 
+  rename(`PO PROB` = `PO Odds`) %>% 
+  mutate(`PO PROB` = glue::glue("{prob}%", prob = `PO PROB` * 100)) %>% 
+  datatable(escape = FALSE, rownames = FALSE,
+            options=list(
+              scrollY = TRUE,
+              ordering = FALSE,
+              pageLength = 12,
+              dom = 't',
+              initComplete = JS("
+                                function(settings, json) {
+                                  $(this.api().table().body()).css({
+                                    'font-family': 'Roboto, Open Sans, sans-serif',
+                                    'font-size': '13px'
+                                  });
+                                  $(this.api().table().header()).css({
+                                    'font-family': 'Roboto, Open Sans, sans-serif',
+                                    'font-size': '14px'
+                                  });
+                                  $(this.api().table().container()).css({
+                                    'font-family': 'Roboto, Open Sans, sans-serif',
+                                    'font-size': '14px'
+                                  });
+                                }
+                                ")
+            )
+  ) %>% 
+  formatStyle(c("TEAM NAME", "POWER RANK", "RECORD", "OVERALL WINS"), textAlign = "center")
+```
+
+Row
+-----------------------------------------------------------------------
+
+### Power Ranks Trends
+
+```{r}
+trends_df <- read_trends(2017) %>% 
+  mutate(week = forcats::fct_inorder(week))
+
+current_order <- trends_df %>% 
+  filter(week == "WEEK 4", trend_type == "power_rank") %>% 
+  arrange(rank) %>% 
+  .[["Team"]]
+```
+
+```{r}
+p <- trends_df %>% 
+  filter(trend_type == "power_rank",
+         !is.na(rank)) %>% 
+  mutate(Team = factor(Team, levels = current_order),
+         ttip = glue::glue("<b>{team}</b>\n{week} rank: <b>{rank}</b>",
+                            team = Team, rank = rank, week = str_to_title(week))) %>% 
+  ggplot2::ggplot(aes(x = as.numeric(week), y = rank)) +
+  geom_line(aes(colour = Team)) +
+  geom_point(aes(colour = Team, text = ttip)) +
+  scale_colour_viridis_d() +
+  scale_x_continuous(breaks = 1:5,
+                     labels = levels(trends_df$week)[1:5],
+                     limits = c(1, 5)) +
+  scale_y_reverse(breaks = 1:12) +
+  ylab("Power Rank") +
+  xlab("") +
+  guides(colour = FALSE) +
+  custom_theme_bw() +
+  theme(axis.text.x = element_text(angle = -15, hjust = 0))
+# p
+ggplotly(p, tooltip = "text")
+```
+
+
