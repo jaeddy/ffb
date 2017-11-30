@@ -1,0 +1,740 @@
+---
+title: "Jefferson Cup 2017 — Week 12 Dashboard"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    vertical_layout: scroll
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(tidyverse)
+library(stringr)
+library(ggplot2)
+library(ggthemes)
+library(plotly)
+library(networkD3)
+library(htmlwidgets)
+library(DT)
+library(stringr)
+library(glue)
+source("../R/fetch_powerrankings.R")
+knitr::opts_chunk$set(echo=FALSE, warning=FALSE, message=FALSE)
+
+custom_theme_bw <- function() {
+    theme_bw() +
+        theme(axis.title = element_text(face = "bold"),
+              legend.title = element_text(face = "bold"),
+              plot.title = element_text(face = "bold"))
+}
+```
+
+
+Rivalry Review
+=====================================  
+
+## **Breakdowns & Predictions**
+
+```{r, message=FALSE, warning=FALSE}
+brad_v_drew <- tibble(Matchup = "Brad (10-3) vs. Drew (7-5)",
+               `ESPN Projections` = "3-10",
+               Notes = glue("Drew was drafting in what appeared to be a very clean, quiet environment, without any distractions or Totinos. With all that extra focus... well, I'm not really sure what happened. Drew was really excited about TY Hilton, which is surprising, given that he's never had the guy on a team before (and oh yeah, Luck is dead). His top 4 RBs included a suspended Doug Martin, the now irrelevant McFadden, and the probably-should-retire-already Forte. Gordon and OBJ should be solid, but aside from them, it's gonna be tough putting together a decent lineup most weeks. Maybe having Katie in the room and dreaming about his pending nuptials in a week was enough to get in Drew's head, or maybe Tyrod Taylor will actually be good this year. I'm going with the former.
+
+
+<b>Week 1 bonus note:</b> Drew pulled off the baller move of getting married, starting an inactive star WR, and winning his first matchup against Toby."))
+
+james_v_tony <- tibble(Matchup = "James (7-5) vs. Tony (4-9)",
+                `ESPN Projections` = "4-9",
+                Notes = glue("James started off strong in this year's draft, but got too conservative later on and missed out on several mid-tier players who could have really complemented a core of David Johnson, Russell Wilson, and Doug Baldwin. Now that DJ is out for weeks / the season, and the Seahawks offense seems inept, the lack of depth is even more apparent... and painful. At least he drafted Frank Gore. Still, James has a history of being one of the most active league members in terms of trades and the waiver wire — so he should be able to scrape together enough moves to avoid the marathon. It's a pretty exciting change in priorities for what looked like a reasonably solid team coming out of the draft.
+
+
+<b>Week 1 bonus note:</b> With a 2nd championship likely off the table, James now has nothing better to do than create stupid posts for the league and talk about himself in the 3rd person."))
+
+toby_v_shep <- tibble(Matchup = "Toby (6-6) vs. Shep (7-5)",
+               `ESPN Projections` = "4-9",
+               Notes = glue("Tony apparently decided to go with the unconventional '0 RB' strategy this year — at least that seems like a fair description for the fearsome stable that is Isaiah Crowell, Jonathan Stewart, and Terrance West. His WR/TE situation on the other hand looks nasty, so he might not need much production from RBs after all. Fortunately, most of his team (including Julio, Michael Thomas, and Kelce) shat the bed in Week 1. Mixing in a dash of personal bias, it's safe to say that none of these players are likely to bounce back, and Tony's team is destined for mediocrity. You like that??
+
+
+<b>Week 1 bonus note:</b> Tarik Cohen is tite. It's gonna be fun to watch Tony pick whom to bench each week out of Crowell/West/Stewart/Cohen/Garcon and inevitably make the wrong decisions."))
+
+billy_v_matt <- tibble(Matchup = "Billy (3-9) vs. Matt (6-6)",
+               `ESPN Projections` = "5-8",
+               Notes = glue("Milf either continues to struggle with the auction draft format, or is just ahead of his time when it comes to strategy. Either way, Milf’s teams have a tendency to raise eyebrows. This year, he targeted last year's biggest bust along with a rookie who may or may not start anytime soon — oh yeah, and two of the top 3 TEs. This team should be interesting to watch, if nothing else. However, if week one is any indication, Milf will need Brees and Evan (probably Gronklsen too) to play well / play at all or things might get ugly.
+
+
+<b>Week 1 bonus note:</b> Mike Evans on an unexpected bye is a reasonable excuse for starting Corey Davis at WR for Week 1; there's no excuse for starting both Davis and Tyler Lockett at the same time."))
+
+milf_v_ross <- tibble(Matchup = "Milf (6-6) vs. Ross (4-9)",
+               `ESPN Projections` = "6-7",
+               Notes = glue("Brad was super excited about his team during and immediately after the draft — which was cute, if misguided. While there's some upside (maybe Matt Ryan gets over his PTSD and has another good year; maybe Cooks is the closest thing to the next Randy Moss.. catching balls from a 40 year old Brady), the rest is underwhelming. Now Brad appears to be dealing with his perennial problem of not having any RBs.. but in the abysmal Atlantic Division, who knows what could happen.
+
+
+<b>Week 1 bonus note:</b> The most exciting thing to happen for Brad's team this week was Tyreek Hill, who was on his bench."))
+
+keith_v_kevin <- tibble(Matchup = "Keith (3-9) vs. Kevin (9-3)",
+               `ESPN Projections` = "7-6",
+               Notes = "Like several of the past seasons, Toby's team coming out of the draft is not particularly remarkable. While his Week 1 struggles didn't do much to counter the 'meh', he might have some bright spots moving forward: Freeman and Cooper should be tite, and Dalvin Cook looks like the next coming of Kareem Hunt. Fitz might be more valuable now too, as he'll pretty much have to carry the Cardinals offense. His post-draft proclamations of winning the league this year are still dubious, but Toby could be a sneaky contender (see above comment about Atlantic Division).
+
+
+<b>Week 1 bonus note:</b> I almost forgot to write a Week 1 note for Toby. He lost to Drew, which if you've been paying any attention so far, is not a good thing. I imagine things will go better in the future when he doesn't sit his 2nd best RB who ran for 127 yards in his first professional football game.")
+
+rivalry_df <- bind_rows(brad_v_drew, james_v_tony, toby_v_shep, 
+                           billy_v_matt, milf_v_ross, keith_v_kevin) %>% 
+  mutate(Notes = str_replace(Notes, "\n", "<br/><br/>"),
+         Matchup = str_c("<b>", Matchup, "</b>"))
+```
+
+
+```{r}
+rivalry_df %>%
+  datatable(escape = FALSE, rownames = FALSE, height = 2800,
+            options=list(
+              scrollY = TRUE,
+              ordering = FALSE,
+              pageLength = 12,
+              dom = 't',
+              initComplete = JS("
+                                function(settings, json) {
+                                  $(this.api().table().body()).css({
+                                    'font-family': 'Roboto, Open Sans, sans-serif',
+                                    'font-size': '11px'
+                                  });
+                                  $(this.api().table().header()).css({
+                                    'font-family': 'Roboto, Open Sans, sans-serif',
+                                    'font-size': '12px'
+                                  });
+                                  $(this.api().table().container()).css({
+                                    'font-family': 'Roboto, Open Sans, sans-serif',
+                                    'font-size': '12px'
+                                  });
+                                }
+                                ")
+            )
+  ) %>% 
+  formatStyle(c("Matchup", "ESPN Projections"), textAlign = "center")
+```
+
+Playoff Scenarios
+=====================================  
+
+Row 
+-----------------------------------------------------------------------
+
+### **Paths to Glory**
+
+```{r include=FALSE}
+links = tribble(
+  ~source, ~target, ~value, ~owner, ~scenario,
+  0, 24, 0.2, "James", "J1",
+  11, 24, 0.2, "James", "J1",
+  0, 25, 0.2, "James", "J2",
+  13, 25, 0.2, "James", "J2",
+  0, 26, 0.2, "James", "J3",
+  3, 26, 0.2, "James", "J3",
+  0, 27, 0.2, "James", "J4",
+  5, 27, 0.2, "James", "J4",
+  1, 28, 0.2, "James", "J5",
+  3, 28, 0.2, "James", "J5",
+  11, 28, 0.2, "James", "J5",
+  5, 28, 0.2, "James", "J5",
+  13, 28, 0.2, "James", "J5",
+  1, 29, 0.2, "James", "J6",
+  7, 29, 0.2, "James", "J6",
+  3, 29, 0.2, "James", "J6",
+  11, 29, 0.2, "James", "J6",
+  1, 30, 0.2, "James", "J7",
+  7, 30, 0.2, "James", "J7",
+  5, 30, 0.2, "James", "J7",
+  13, 30, 0.2, "James", "J7",
+  2, 31, 0.2, "Drew", "D1",
+  10, 31, 0.2, "Drew", "D1",
+  2, 32, 0.2, "Drew", "D2",
+  15, 32, 0.2, "Drew", "D2",
+  2, 33, 0.2, "Drew", "D3",
+  1, 33, 0.2, "Drew", "D3",
+  2, 34, 0.2, "Drew", "D4",
+  5, 34, 0.2, "Drew", "D4",
+  3, 35, 0.2, "Drew", "D5",
+  1, 35, 0.2, "Drew", "D5",
+  10, 35, 0.2, "Drew", "D5",
+  5, 35, 0.2, "Drew", "D5",
+  15, 35, 0.2, "Drew", "D5",
+  19, 35, 0.2, "Drew", "D5",
+  3, 36, 0.2, "Drew", "D6",
+  7, 36, 0.2, "Drew", "D6",
+  1, 36, 0.2, "Drew", "D6",
+  10, 36, 0.2, "Drew", "D6",
+  19, 36, 0.2, "Drew", "D6",
+  3, 37, 0.2, "Drew", "D7",
+  7, 37, 0.2, "Drew", "D7",
+  5, 37, 0.2, "Drew", "D7",
+  15, 37, 0.2, "Drew", "D7",
+  19, 37, 0.2, "Drew", "D7",
+  23, 37, 0.2, "Drew", "D7",
+  4, 38, 0.2, "Shep", "S1",
+  12, 38, 0.2, "Shep", "S1",
+  4, 39, 0.2, "Shep", "S2",
+  14, 39, 0.2, "Shep", "S2",
+  4, 40, 0.2, "Shep", "S3",
+  1, 40, 0.2, "Shep", "S3",
+  4, 41, 0.2, "Shep", "S4",
+  3, 41, 0.2, "Shep", "S4",
+  5, 42, 0.2, "Shep", "S5",
+  7, 42, 0.2, "Shep", "S5",
+  3, 42, 0.2, "Shep", "S5",
+  14, 42, 0.2, "Shep", "S5",
+  17, 42, 0.2, "Shep", "S5",
+  21, 42, 0.2, "Shep", "S5",
+  6, 43, 0.2, "Matt", "M1",
+  1, 43, 0.2, "Matt", "M1",
+  3, 43, 0.2, "Matt", "M1",
+  6, 44, 0.2, "Matt", "M2",
+  1, 44, 0.2, "Matt", "M2",
+  5, 44, 0.2, "Matt", "M2",
+  6, 45, 0.2, "Matt", "M3",
+  3, 45, 0.2, "Matt", "M3",
+  5, 45, 0.2, "Matt", "M3",
+  8, 46, 0.2, "Milf", "W1",
+  7, 46, 0.2, "Milf", "W1",
+  3, 46, 0.2, "Milf", "W1",
+  18, 46, 0.2, "Milf", "W1",
+  5, 46, 0.2, "Milf", "W1",
+  20, 46, 0.2, "Milf", "W1",
+  48, 46, 0.2, "Milf", "W1",
+  5, 49, 0.2, "Toby", "T1",
+  16, 49, 0.2, "Toby", "T1",
+  7, 49, 0.2, "Toby", "T1",
+  3, 49, 0.2, "Toby", "T1",
+  22, 49, 0.2, "Toby", "T1",
+  47, 49, 0.2, "Toby", "T1",
+  5, 50, 0.2, "Toby", "T2",
+  16, 50, 0.2, "Toby", "T2",
+  7, 50, 0.2, "Toby", "T2",
+  3, 50, 0.2, "Toby", "T2",
+  22, 50, 0.2, "Toby", "T2",
+  9, 50, 0.2, "Toby", "T2",
+  24, 51, 0.4, "James", "",
+  25, 51, 0.4, "James", "",    
+  26, 51, 0.4, "James", "",
+  27, 51, 0.4, "James", "",
+  28, 51, 1, "James", "",
+  29, 51, 0.8, "James", "",
+  30, 51, 0.8, "James", "",
+  31, 52, 0.4, "Drew", "",
+  32, 52, 0.4, "Drew", "",    
+  33, 52, 0.4, "Drew", "",
+  34, 52, 0.4, "Drew", "",
+  35, 52, 1.2, "Drew", "",
+  36, 52, 1, "Drew", "",
+  37, 52, 1.2, "Drew", "",
+  38, 53, 0.4, "Shep", "",
+  39, 53, 0.4, "Shep", "",    
+  40, 53, 0.4, "Shep", "",
+  41, 53, 0.4, "Shep", "",
+  42, 53, 1.2, "Shep", "",
+  43, 54, 0.6, "Matt", "",
+  44, 54, 0.6, "Matt", "",
+  45, 54, 0.6, "Matt", "",
+  46, 55, 1.4, "Milf", "",    
+  49, 56, 1.2, "Toby", "",
+  50, 56, 1.2, "Toby", ""
+)
+
+nodes = tribble(
+  ~node, ~name, ~foo,
+  0, "James beats Tony", "R",
+  1, "Tony beats James", "R",
+  2, "Drew beats Brad", "R",
+  3, "Brad beats Drew", "R",
+  4, "Shep beats Toby", "R",
+  5, "Toby beats Shep", "R",
+  6, "Matt beats Billy", "R",
+  7, "Billy beats Matt", "R",
+  8, "Milf beats Ross", "R",
+  9, "Ross beats Milf", "R",
+  10, "Drew scores > James + 54.4", "Points",
+  11, "Drew scores < James + 54.4", "Points",
+  12, "Shep scores > James + 78.1", "Points",
+  13, "Shep scores < James + 78.1", "Points",
+  14, "Shep scores > Drew + 23.7", "Points",
+  15, "Shep scores < Drew + 23.7", "Points",
+  16, "Toby scores > Shep + 75.1", "Points",
+  17, "Toby scores < Shep + 75.1", "Points",
+  18, "Milf scores > Drew + 64.8", "Points",
+  19, "Milf scores < Drew + 64.8", "Points",
+  20, "Milf scores > Shep + 41.1", "Points",
+  21, "Milf scores < Shep + 41.1", "Points",
+  22, "Toby scores > Drew + 98.8", "Points",
+  23, "Toby scores < Drew + 98.8", "Points",
+  24, "J1", "James",
+  25, "J2", "James",
+  26, "J3", "James",
+  27, "J4", "James",
+  28, "J5", "James",
+  29, "J6", "James",
+  30, "J7", "James",
+  31, "D1", "Drew",
+  32, "D2", "Drew",
+  33, "D3", "Drew",
+  34, "D4", "Drew",
+  35, "D5", "Drew",
+  36, "D6", "Drew",
+  37, "D7", "Drew",
+  38, "S1", "Shep",
+  39, "S2", "Shep",
+  40, "S3", "Shep",
+  41, "S4", "Shep",
+  42, "S5", "Shep",
+  43, "M1", "Matt",
+  44, "M2", "Matt",
+  45, "M3", "Matt",
+  46, "W1", "Milf",
+  47, "Toby scores > Milf + 34", "Points",
+  48, "Toby scores < Milf + 34", "Points",
+  49, "T1", "Toby",
+  50, "T2", "Toby",
+  51, "James PLAYOFFS", "James",
+  52, "Drew PLAYOFFS", "Drew",
+  53, "Shep PLAYOFFS", "Shep",
+  54, "Matt PLAYOFFS", "Matt",
+  55, "Milf PLAYOFFS", "Milf",
+  56, "Toby PLAYOFFS", "Toby"
+)
+```
+
+```{r, fig.height=7}
+sn <- sankeyNetwork(
+  Links = links,
+  Nodes = nodes, 
+  Source = "source",
+  Target = "target", 
+  Value = "value", 
+  NodeID = "name",
+  NodeGroup = "foo",
+  LinkGroup = "owner",
+  colourScale = JS("d3.scaleOrdinal()
+                   .domain(['James', 'Drew', 'Shep', 'Matt', 'Milf', 'Toby', 'R', 'Points'])
+                   .range(['#bcbd22', '#17becf', '#ffb300', '#7f7f7f', '#d62728','#393b79', '#000', '#777']);"),
+  fontSize = 11, 
+  fontFamily = "Roboto",
+  nodeWidth = 15,
+  margin = list(right = 150)
+)
+
+sn <- onRender(
+  sn,
+  '
+  function(el,x){
+  var node_text = d3.select(el)
+  .selectAll(".node text")
+  .style("font-weight", "bold")
+  .filter(function(d) { return (d.name.search("beats|scores") > -1); })
+  .attr("x", x.options.nodeWidth - 20)
+  .attr("text-anchor", "end");
+  }
+  '
+)
+
+sn
+
+```
+
+Row 
+-----------------------------------------------------------------------
+
+### **Scenarios Spelled Out**
+
+```{r}
+scenarios_df <- links %>% 
+  left_join(nodes, by = c("source" = "node")) %>% 
+  select(-source, -target, -value, -foo) %>% 
+  filter(stringr::str_length(scenario) > 0) %>%
+  group_by(owner, scenario) %>% 
+  summarise(outcomes = stringr::str_c(unique(name), collapse = "</br>")) %>% 
+  rename(Owner = owner, Scenario = scenario, Outcomes = outcomes)
+
+scenarios_df %>% 
+  datatable(escape = FALSE, rownames = FALSE, height = 2800,
+            options=list(
+              scrollY = TRUE,
+              ordering = FALSE,
+              pageLength = 10,
+              dom = 'tp',
+              initComplete = JS("
+                                function(settings, json) {
+                                  $(this.api().table().body()).css({
+                                    'font-family': 'Roboto, Open Sans, sans-serif',
+                                    'font-size': '11px'
+                                  });
+                                  $(this.api().table().header()).css({
+                                    'font-family': 'Roboto, Open Sans, sans-serif',
+                                    'font-size': '12px'
+                                  });
+                                  $(this.api().table().container()).css({
+                                    'font-family': 'Roboto, Open Sans, sans-serif',
+                                    'font-size': '12px'
+                                  });
+                                }
+                                ")
+            )
+  )
+```
+
+LPP Scenarios
+=====================================  
+
+Row 
+-----------------------------------------------------------------------
+
+### **26.2 Mile Road to Failure**
+
+```{r include=FALSE}
+links2 = tribble(
+  ~source, ~target, ~value, ~owner, ~scenario,
+  0, 24, 0.2, "James", "J1",
+  11, 24, 0.2, "James", "J1",
+  0, 25, 0.2, "James", "J2",
+  13, 25, 0.2, "James", "J2",
+  0, 26, 0.2, "James", "J3",
+  3, 26, 0.2, "James", "J3",
+  0, 27, 0.2, "James", "J4",
+  5, 27, 0.2, "James", "J4",
+  1, 28, 0.2, "James", "J5",
+  3, 28, 0.2, "James", "J5",
+  11, 28, 0.2, "James", "J5",
+  5, 28, 0.2, "James", "J5",
+  13, 28, 0.2, "James", "J5",
+  1, 29, 0.2, "James", "J6",
+  7, 29, 0.2, "James", "J6",
+  3, 29, 0.2, "James", "J6",
+  11, 29, 0.2, "James", "J6",
+  1, 30, 0.2, "James", "J7",
+  7, 30, 0.2, "James", "J7",
+  5, 30, 0.2, "James", "J7",
+  13, 30, 0.2, "James", "J7",
+  2, 31, 0.2, "Drew", "D1",
+  10, 31, 0.2, "Drew", "D1",
+  2, 32, 0.2, "Drew", "D2",
+  15, 32, 0.2, "Drew", "D2",
+  2, 33, 0.2, "Drew", "D3",
+  1, 33, 0.2, "Drew", "D3",
+  2, 34, 0.2, "Drew", "D4",
+  5, 34, 0.2, "Drew", "D4",
+  3, 35, 0.2, "Drew", "D5",
+  1, 35, 0.2, "Drew", "D5",
+  10, 35, 0.2, "Drew", "D5",
+  5, 35, 0.2, "Drew", "D5",
+  15, 35, 0.2, "Drew", "D5",
+  19, 35, 0.2, "Drew", "D5",
+  3, 36, 0.2, "Drew", "D6",
+  7, 36, 0.2, "Drew", "D6",
+  1, 36, 0.2, "Drew", "D6",
+  10, 36, 0.2, "Drew", "D6",
+  19, 36, 0.2, "Drew", "D6",
+  3, 37, 0.2, "Drew", "D7",
+  7, 37, 0.2, "Drew", "D7",
+  5, 37, 0.2, "Drew", "D7",
+  15, 37, 0.2, "Drew", "D7",
+  19, 37, 0.2, "Drew", "D7",
+  23, 37, 0.2, "Drew", "D7",
+  4, 38, 0.2, "Shep", "S1",
+  12, 38, 0.2, "Shep", "S1",
+  4, 39, 0.2, "Shep", "S2",
+  14, 39, 0.2, "Shep", "S2",
+  4, 40, 0.2, "Shep", "S3",
+  1, 40, 0.2, "Shep", "S3",
+  4, 41, 0.2, "Shep", "S4",
+  3, 41, 0.2, "Shep", "S4",
+  5, 42, 0.2, "Shep", "S5",
+  7, 42, 0.2, "Shep", "S5",
+  3, 42, 0.2, "Shep", "S5",
+  14, 42, 0.2, "Shep", "S5",
+  17, 42, 0.2, "Shep", "S5",
+  21, 42, 0.2, "Shep", "S5",
+  6, 43, 0.2, "Matt", "M1",
+  1, 43, 0.2, "Matt", "M1",
+  3, 43, 0.2, "Matt", "M1",
+  6, 44, 0.2, "Matt", "M2",
+  1, 44, 0.2, "Matt", "M2",
+  5, 44, 0.2, "Matt", "M2",
+  6, 45, 0.2, "Matt", "M3",
+  3, 45, 0.2, "Matt", "M3",
+  5, 45, 0.2, "Matt", "M3",
+  8, 46, 0.2, "Milf", "W1",
+  7, 46, 0.2, "Milf", "W1",
+  3, 46, 0.2, "Milf", "W1"
+
+)
+
+nodes2 = tribble(
+  ~node, ~name, ~foo,
+  0, "James beats Tony", "R",
+  1, "Tony beats James", "R",
+  4, "Kevin beats Keith", "R",
+  5, "Keith beats Kevin", "R",
+  6, "Matt beats Billy", "R",
+  7, "Billy beats Matt", "R",
+  8, "Milf beats Ross", "R",
+  9, "Ross beats Milf", "R",
+  10, "Billy scores > Keith + 33.4", "Points",
+  11, "Billy scores < Keith + 33.4", "Points",
+  12, "Tony scores > Billy + 2.6", "Points",
+  13, "Tony scores < Billy + 2.6", "Points",
+  14, "Ross scores > Billy + 4.8", "Points",
+  15, "Ross scores < Billy + 4.8", "Points",
+  16, "Tony scores > Keith + 36", "Points",
+  17, "Tony scores < Keith + 36", "Points",
+  18, "Ross scores > Keith + 28.6", "Points",
+  19, "Ross scores < Keith + 28.6", "Points",
+  20, "Tony scores > Ross + 7.4", "Points",
+  21, "Tony scores < Ross + 7.4", "Points",
+  24, "B1", "Billy",
+  25, "B2", "Billy",
+  26, "B3", "Billy",
+  27, "B4", "Billy",
+  28, "B5", "Billy",
+  29, "B6", "Billy",
+  30, "B7", "Billy",
+  31, "K1", "Keith",
+  32, "K2", "Keith",
+  33, "K3", "Keith",
+  34, "K4", "Keith",
+  35, "K5", "Keith",
+  36, "K6", "Keith",
+  37, "K7", "Keith",
+  38, "T1", "Tony",
+  39, "T2", "Tony",
+  40, "T3", "Tony",
+  41, "T4", "Tony",
+  42, "T5", "Tony",
+  43, "R1", "Ross",
+  44, "R2", "Ross",
+  45, "R3", "Ross",
+  51, "Billy MARATHON", "Billy",
+  52, "Keith MARATHON", "Keith",
+  53, "Tony MARATHON", "Tony",
+  54, "Ross MARATHON", "Ross"
+)
+```
+
+```{r, fig.height=7}
+sn2 <- sankeyNetwork(
+  Links = links2,
+  Nodes = nodes2, 
+  Source = "source",
+  Target = "target", 
+  Value = "value", 
+  NodeID = "name",
+  NodeGroup = "foo",
+  LinkGroup = "owner",
+  colourScale = JS("d3.scaleOrdinal()
+                   .domain(['James', 'Drew', 'Shep', 'Matt', 'Milf', 'Toby', 'R', 'Points'])
+                   .range(['#bcbd22', '#17becf', '#ffb300', '#7f7f7f', '#d62728','#393b79', '#000', '#777']);"),
+  fontSize = 11, 
+  fontFamily = "Roboto",
+  nodeWidth = 15,
+  margin = list(right = 150)
+)
+
+sn2 <- onRender(
+  sn2,
+  '
+  function(el,x){
+  var node_text = d3.select(el)
+  .selectAll(".node text")
+  .style("font-weight", "bold")
+  .filter(function(d) { return (d.name.search("beats|scores") > -1); })
+  .attr("x", x.options.nodeWidth - 20)
+  .attr("text-anchor", "end");
+  }
+  '
+)
+
+sn2
+
+```
+
+Row 
+-----------------------------------------------------------------------
+
+### **Scenarios Spelled Out**
+
+```{r}
+scenarios_df2 <- links2 %>% 
+  left_join(nodes2, by = c("source" = "node")) %>% 
+  select(-source, -target, -value, -foo) %>% 
+  filter(stringr::str_length(scenario) > 0) %>%
+  group_by(owner, scenario) %>% 
+  summarise(outcomes = stringr::str_c(unique(name), collapse = "</br>")) %>% 
+  rename(Owner = owner, Scenario = scenario, Outcomes = outcomes)
+
+scenarios_df2 %>% 
+  datatable(escape = FALSE, rownames = FALSE, height = 2800,
+            options=list(
+              scrollY = TRUE,
+              ordering = FALSE,
+              pageLength = 10,
+              dom = 'tp',
+              initComplete = JS("
+                                function(settings, json) {
+                                  $(this.api().table().body()).css({
+                                    'font-family': 'Roboto, Open Sans, sans-serif',
+                                    'font-size': '11px'
+                                  });
+                                  $(this.api().table().header()).css({
+                                    'font-family': 'Roboto, Open Sans, sans-serif',
+                                    'font-size': '12px'
+                                  });
+                                  $(this.api().table().container()).css({
+                                    'font-family': 'Roboto, Open Sans, sans-serif',
+                                    'font-size': '12px'
+                                  });
+                                }
+                                ")
+            )
+  )
+```
+
+Power Rankings
+=====================================  
+
+Row 
+-----------------------------------------------------------------------
+
+### **Rankings & Stats**
+
+```{r}
+pr_week12 <- get_powerrankings(2017, 12, data_dir = "../data")
+```
+
+```{r}
+pr_week12 %>% 
+  arrange(`POWER                             RANK                           SCORE`) %>% 
+  select(-Δ, -CONS, -`POWER                             RANK                           SCORE`) %>% 
+  rename(`Playoff Prob.` = `PO Odds`, Team = `TEAM NAME`, 
+         `Power Rank` = `POWER RANK`, Record = RECORD, 
+         `Overall Record` = `OVERALL WINS`, 
+         `Roster Strengh` = `R.O.S. ROSTER`) %>% 
+  mutate(`Playoff Prob.` = glue::glue("{prob}%", 
+                                      prob = `Playoff Prob.` * 100),
+         PPG = map_chr(PPG, function(x) {str_split(x, ",") %>% 
+             flatten_chr() %>% 
+             rev() %>% 
+             str_c(collapse = " (") %>% 
+             str_c(")")
+           }),
+         PPG = str_replace(PPG, "ppg", "")) %>% 
+  datatable(escape = FALSE, rownames = FALSE,
+            options=list(
+              scrollY = TRUE,
+              ordering = FALSE,
+              pageLength = 12,
+              dom = 't',
+              initComplete = JS("
+                                function(settings, json) {
+                                  $(this.api().table().body()).css({
+                                    'font-family': 'Roboto, Open Sans, sans-serif',
+                                    'font-size': '11px'
+                                  });
+                                  $(this.api().table().header()).css({
+                                    'font-family': 'Roboto, Open Sans, sans-serif',
+                                    'font-size': '12px'
+                                  });
+                                  $(this.api().table().container()).css({
+                                    'font-family': 'Roboto, Open Sans, sans-serif',
+                                    'font-size': '12px'
+                                  });
+                                }
+                                ")
+            )
+  ) %>% 
+  formatStyle(c("Team", "Power Rank", "Record", "Overall Record"), textAlign = "center")
+```
+
+Row 
+-----------------------------------------------------------------------
+
+### Column Key
+
+```{r}
+tribble(
+  ~Column, ~Description,
+  "Team", 'Best attempt to get everyone\'s team name correct. Stop changing your team names, assholes.',
+  "Power Rank", 'Current power rank, calculated based on <b><a href="https://www.reddit.com/r/fantasyfootball/comments/6y08cr/gators_2017_ff_power_ranking_spreadsheet_for_use/" target="_blank">this spreadsheet</a></b> I found on reddit.',
+  "Playoff Prob.",  '("Prob." is short for "Probability") This is not used in any kind of determination of Power Rankings, but is copied from <a href="https://www.fantasypros.com/" target="_blank">FantasyPros</a> and displayed for shits and giggles. From the author: "*I currently use FPros for this, but am not super happy with it. They incorporate roster strength into it, which I don\'t want. FPros also does not take league setup like divisions and wildcards into account. I want just a straight up probability without anything subjective. if someone knows of a service that offers that, please let me know! But for now, I\'ll continue to use what I\'ve got.',
+  "Record", 'Pretty self explanatory. You can find out more about how everything gets weighted at the link above.',
+  "Overall Record", 'This is what your record would be if you played every team every week (basically, how your score stacks up against everyone else).',
+  "PPG", 'Points scored per game (and corresponding league rank in that category).',
+  "Roster Strength", 'Rest-of-season roster strength, relative to the rest of the league. This is also copied from FantasyPros.'
+) %>% 
+  datatable(escape = FALSE, rownames = FALSE, height = 2800,
+            options=list(
+              scrollY = TRUE,
+              ordering = FALSE,
+              pageLength = 12,
+              dom = 't',
+              initComplete = JS("
+                                function(settings, json) {
+                                  $(this.api().table().body()).css({
+                                    'font-family': 'Roboto, Open Sans, sans-serif',
+                                    'font-size': '11px'
+                                  });
+                                  $(this.api().table().header()).css({
+                                    'font-family': 'Roboto, Open Sans, sans-serif',
+                                    'font-size': '12px'
+                                  });
+                                  $(this.api().table().container()).css({
+                                    'font-family': 'Roboto, Open Sans, sans-serif',
+                                    'font-size': '12px'
+                                  });
+                                }
+                                ")
+            )
+  )
+```
+
+
+Trends
+=====================================  
+
+Row
+-----------------------------------------------------------------------
+
+### **Power Rank Trends**
+
+```{r}
+trends_df <- read_trends(2017) %>% 
+  mutate(week = forcats::fct_inorder(week))
+
+current_order <- trends_df %>% 
+  filter(week == "WEEK 12", trend_type == "power_rank") %>% 
+  arrange(rank) %>% 
+  .[["Team"]]
+```
+
+```{r, fig.height=5}
+p <- trends_df %>% 
+  filter(trend_type == "power_rank",
+         !is.na(rank)) %>% 
+  mutate(Team = factor(Team, levels = current_order),
+         ttip = glue::glue("<b>{team}</b>\n{week} rank: <b>{rank}</b>",
+                            team = Team, rank = rank, week = str_to_title(week))) %>% 
+  ggplot2::ggplot(aes(x = as.numeric(week), y = rank)) +
+  geom_line(aes(colour = Team)) +
+  geom_point(aes(colour = Team, text = ttip)) +
+  scale_color_calc() +
+  scale_x_continuous(breaks = 1:13,
+                     labels = levels(trends_df$week)[1:13],
+                     limits = c(1, 13)) +
+  scale_y_reverse(breaks = 1:13) +
+  ylab("Power Rank") +
+  xlab("") +
+  guides(colour = FALSE) +
+  custom_theme_bw() +
+  theme(axis.text.x = element_text(angle = -30, hjust = 0))
+# p
+ggplotly(p, tooltip = "text") %>% 
+  layout(margin = list(b = 55))
+```
+
+
