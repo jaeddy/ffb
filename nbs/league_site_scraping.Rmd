@@ -1,0 +1,28 @@
+---
+title: "ESPN League Site Scraping"
+output: html_notebook
+---
+
+```{r}
+library(httr)
+library(rvest)
+library(stringr)
+library(dplyr)
+```
+
+```{r}
+team_url <- "http://games.espn.com/ffl/clubhouse?leagueId=52048&teamId=5&seasonId=2016"
+    
+base_html <- read_html("data/jeff_cup_schedule.html")
+base_html %>% 
+  html_table()
+  
+```
+
+```{r}
+username = "elstupido85"
+password = "victory"
+
+GET(team_url, authenticate(username, password), verbose())
+```
+

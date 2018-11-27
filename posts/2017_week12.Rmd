@@ -1,7 +1,8 @@
 ---
-title: "Jefferson Cup 2017 — Week 12 Dashboard"
+title: "Jefferson Cup 2017 — Week 12 Jogboard"
 output: 
   flexdashboard::flex_dashboard:
+    theme: yeti
     orientation: rows
     vertical_layout: scroll
 ---
@@ -36,47 +37,53 @@ Rivalry Review
 ## **Breakdowns & Predictions**
 
 ```{r, message=FALSE, warning=FALSE}
-brad_v_drew <- tibble(Matchup = "Brad (10-3) vs. Drew (7-5)",
-               `ESPN Projections` = "3-10",
-               Notes = glue("Drew was drafting in what appeared to be a very clean, quiet environment, without any distractions or Totinos. With all that extra focus... well, I'm not really sure what happened. Drew was really excited about TY Hilton, which is surprising, given that he's never had the guy on a team before (and oh yeah, Luck is dead). His top 4 RBs included a suspended Doug Martin, the now irrelevant McFadden, and the probably-should-retire-already Forte. Gordon and OBJ should be solid, but aside from them, it's gonna be tough putting together a decent lineup most weeks. Maybe having Katie in the room and dreaming about his pending nuptials in a week was enough to get in Drew's head, or maybe Tyrod Taylor will actually be good this year. I'm going with the former.
+brad_v_drew <- tibble(Matchup = "Brad (10-3)</br>vs.</br>Drew (7-5)",
+                      `ESPN Projections` = "<b>99.6</b></br>to</br>87",
+                      `FantasyPros Projections` = "<b>101</b></br>to</br>94",
+                      Notes = glue("Brad and Drew have both displayed a confusing mix of tite and not at all tite performances this year. Brad has obviously executed this strategy with greater success, but Drew is very much still in it. I'm not really sure who's on Drew's team anymore besides Carson Wentz, but that seems to be good enough. As much as I want to see a rematch in the 1-4 seed matchup next week, I'm predicting that Brad rides Orleans “the Dark Horse” Darkwa to victory and a shot to tie Drew's overall season wins record.
 
 
-<b>Week 1 bonus note:</b> Drew pulled off the baller move of getting married, starting an inactive star WR, and winning his first matchup against Toby."))
+<b>Rivalry impact rating: 6.0</b> I'm sure eliminating Drew from the playoffs would make Brad extremely happy, but it just doesn't have the same bite as sentencing one's rival to a painful trial of human endurance. Drew beating Brad, on the other hand, would just be a teaser for Week 14. I expect the trash talk will be entertaining though."))
 
-james_v_tony <- tibble(Matchup = "James (7-5) vs. Tony (4-9)",
-                `ESPN Projections` = "4-9",
-                Notes = glue("James started off strong in this year's draft, but got too conservative later on and missed out on several mid-tier players who could have really complemented a core of David Johnson, Russell Wilson, and Doug Baldwin. Now that DJ is out for weeks / the season, and the Seahawks offense seems inept, the lack of depth is even more apparent... and painful. At least he drafted Frank Gore. Still, James has a history of being one of the most active league members in terms of trades and the waiver wire — so he should be able to scrape together enough moves to avoid the marathon. It's a pretty exciting change in priorities for what looked like a reasonably solid team coming out of the draft.
-
-
-<b>Week 1 bonus note:</b> With a 2nd championship likely off the table, James now has nothing better to do than create stupid posts for the league and talk about himself in the 3rd person."))
-
-toby_v_shep <- tibble(Matchup = "Toby (6-6) vs. Shep (7-5)",
-               `ESPN Projections` = "4-9",
-               Notes = glue("Tony apparently decided to go with the unconventional '0 RB' strategy this year — at least that seems like a fair description for the fearsome stable that is Isaiah Crowell, Jonathan Stewart, and Terrance West. His WR/TE situation on the other hand looks nasty, so he might not need much production from RBs after all. Fortunately, most of his team (including Julio, Michael Thomas, and Kelce) shat the bed in Week 1. Mixing in a dash of personal bias, it's safe to say that none of these players are likely to bounce back, and Tony's team is destined for mediocrity. You like that??
+james_v_tony <- tibble(Matchup = "James (7-5)</br>vs.</br>Tony (4-9)",
+                       `ESPN Projections` = "<b>97.1</b></br>to</br>93.2",
+                       `FantasyPros Projections` = "<b>103</b></br>to</br>92.4",
+                       Notes = glue("Fatherhood has apparently sent Tony's once respectable fantasy prowess into a downward spiral that will hopefully lead to years of mediocrity. Still, he has a knack for beating me when it counts the most. Attempting to cap off the greatest comeback in recent memory — from 1-5 to 8-5 and a playoff berth — I just need to get past a resurgent Julio Jones and his complementing cast of.. whatever. With most of my team lighting it up over the past few weeks, I think it can be done. 
 
 
-<b>Week 1 bonus note:</b> Tarik Cohen is tite. It's gonna be fun to watch Tony pick whom to bench each week out of Crowell/West/Stewart/Cohen/Garcon and inevitably make the wrong decisions."))
+<b>Rivalry impact rating: 7.8 —</b> Clinching a playoff spot after my disastrous start to the season and sealing Tony's last place finish in the process would be tiiiite. Unfortunately, Tony would need some help from Keith and Billy to get his jog on. Still, there's a lot of potential for one of us to make the other very sad."))
 
-billy_v_matt <- tibble(Matchup = "Billy (3-9) vs. Matt (6-6)",
-               `ESPN Projections` = "5-8",
-               Notes = glue("Milf either continues to struggle with the auction draft format, or is just ahead of his time when it comes to strategy. Either way, Milf’s teams have a tendency to raise eyebrows. This year, he targeted last year's biggest bust along with a rookie who may or may not start anytime soon — oh yeah, and two of the top 3 TEs. This team should be interesting to watch, if nothing else. However, if week one is any indication, Milf will need Brees and Evan (probably Gronklsen too) to play well / play at all or things might get ugly.
-
-
-<b>Week 1 bonus note:</b> Mike Evans on an unexpected bye is a reasonable excuse for starting Corey Davis at WR for Week 1; there's no excuse for starting both Davis and Tyler Lockett at the same time."))
-
-milf_v_ross <- tibble(Matchup = "Milf (6-6) vs. Ross (4-9)",
-               `ESPN Projections` = "6-7",
-               Notes = glue("Brad was super excited about his team during and immediately after the draft — which was cute, if misguided. While there's some upside (maybe Matt Ryan gets over his PTSD and has another good year; maybe Cooks is the closest thing to the next Randy Moss.. catching balls from a 40 year old Brady), the rest is underwhelming. Now Brad appears to be dealing with his perennial problem of not having any RBs.. but in the abysmal Atlantic Division, who knows what could happen.
+toby_v_shep <- tibble(Matchup = "Toby (6-6)</br>vs.</br>Shep (7-5)",
+                      `ESPN Projections` = "82.6</br>to</br><b>91.1</b>",
+                      `FantasyPros Projections` = "87</br>to</br><b>95</b>",
+                      Notes = glue("Toby had some legit potential coming into the season, but the loss of Dalvin Cook (and more recently Foreman), combined with some poor management and the decline of the Chiefs, has left him firmly situated to finish in the middle of the pack. Shep was able to use Zeke perhaps more than anyone expected this year, but his stable of 18 RB2 types (and/or his management thereof) has disappointed since the suspension took effect.
 
 
-<b>Week 1 bonus note:</b> The most exciting thing to happen for Brad's team this week was Tyreek Hill, who was on his bench."))
+<b>Rivalry impact rating: 4.6 —</b> This is pretty one sided: Shep could really use a win to secure a playoff spot, while Toby will probably finish around 6th either way. Spoiler potential is always fun though. Go Tobes!"))
 
-keith_v_kevin <- tibble(Matchup = "Keith (3-9) vs. Kevin (9-3)",
-               `ESPN Projections` = "7-6",
-               Notes = "Like several of the past seasons, Toby's team coming out of the draft is not particularly remarkable. While his Week 1 struggles didn't do much to counter the 'meh', he might have some bright spots moving forward: Freeman and Cooper should be tite, and Dalvin Cook looks like the next coming of Kareem Hunt. Fitz might be more valuable now too, as he'll pretty much have to carry the Cardinals offense. His post-draft proclamations of winning the league this year are still dubious, but Toby could be a sneaky contender (see above comment about Atlantic Division).
+billy_v_matt <- tibble(Matchup = "Billy (3-9)</br>vs.</br>Matt (6-6)",
+                       `ESPN Projections` = "85.5</br>to</br><b>95.7</b>",
+                       `FantasyPros Projections` = "90</br>to</br><b>100</b>",
+                       Notes = glue("Matt seems to have mastered the art of a strong start followed by a slow and painful collapse. Billy, meanwhile, is more famous for his annual mediocre start followed by a slow and painful collapse. They both have a lot to play for this week: Matt needs a win to make the playoffs, and Billy is the odds-on favorite to run a marathon. On paper, this could be anyone's game, but history suggests that Matt will find a way to win. I side with history — and math — to give the nod to Matt. 
 
 
-<b>Week 1 bonus note:</b> I almost forgot to write a Week 1 note for Toby. He lost to Drew, which if you've been paying any attention so far, is not a good thing. I imagine things will go better in the future when he doesn't sit his 2nd best RB who ran for 127 yards in his first professional football game.")
+<b>Rivalry impact rating: 9.2 —</b> Oh, how the tables have turned... Two years ago, this game was about avoiding open mic standup. Now, Billy and Matt have the opportunity to determine each other's <i>very different</i> fates. Given the broader consequences of this matchup on both the playoff and LPP results, this one calls for some popcorn."))
+
+milf_v_ross <- tibble(Matchup = "Milf (6-6)</br>vs.</br>Ross (4-9)",
+                      `ESPN Projections` = "<b>91.4</b></br>to</br>86.7",
+                      `FantasyPros Projections` = "<b>93.9</b></br>to</br>91.9",
+                      Notes = glue("I feel like this rivalry is embodied by contrasting examples of how life can get in the way of fantasy football. Ross, unlike the other rookies in the league, is in full on dad mode; Milf is pretty much the opposite. In both cases, these distractions might explain why Ross and Milf have eached looked awesome at times this season, then completely terrible other weeks. While all of Ross' Panthers have been solid lately, my money is on Gurley and Team Milf this week.
+
+
+<b>Rivalry impact rating: 3.3 —</b> These sneaky good / sneaky bad Virginia Tech alums are facing off for a miracle shot at the playoffs OR an outside chance at finishing last. While the outcomes are enticing, the small odds of either happening make this matchup a bit of a snoozer (apnea free, courtesy of Milf's CPAP machine)."))
+
+keith_v_kevin <- tibble(Matchup = "Keith (3-9)</br>vs.</br>Kevin (9-3)",
+                        `ESPN Projections` = "92.4</br>to</br><b>97.2</b>",
+                        `FantasyPros Projections` = "94</br>to</br>94",               
+                        Notes = "Kevin has taken advantage of an elite defense to claim the Coastal Division title, but a few of his premier players have been disappointing down the stretch. Keith has employed a unique blend of incompetence and indifference to end up in a virtual tie for last place, but now has Antonio Brown and managed to evade a chafed nipple fate last week. Still, I expect Kevin's guys to bounce back — and Big Ben effectively neutralizes AB (some) — leaving Keith to pray that Billy doesn't overcome the point deficit. Matt and Kevin have a much better chance to cause great suffering for their rivals, sadly letting Tony off the hook.
+
+
+<b>Rivalry impact rating: 8.1 —</b> If Kevin hadn't already clinched a playoff spot, this matchup might have been the winner — way to go, dick. As it is, the distinct possibility of a 1st-vs.-last rivalry is pretty delicious. On the other hand, the best possible outcome of Keith winning is that Keith is really excited, and nobody wants that.")
 
 rivalry_df <- bind_rows(brad_v_drew, james_v_tony, toby_v_shep, 
                            billy_v_matt, milf_v_ross, keith_v_kevin) %>% 
@@ -97,15 +104,15 @@ rivalry_df %>%
                                 function(settings, json) {
                                   $(this.api().table().body()).css({
                                     'font-family': 'Roboto, Open Sans, sans-serif',
-                                    'font-size': '11px'
+                                    'font-size': '12px'
                                   });
                                   $(this.api().table().header()).css({
                                     'font-family': 'Roboto, Open Sans, sans-serif',
-                                    'font-size': '12px'
+                                    'font-size': '13px'
                                   });
                                   $(this.api().table().container()).css({
                                     'font-family': 'Roboto, Open Sans, sans-serif',
-                                    'font-size': '12px'
+                                    'font-size': '13px'
                                   });
                                 }
                                 ")
@@ -122,7 +129,7 @@ Row
 
 ### **Paths to Glory**
 
-```{r include=FALSE}
+```{r include=FALSE, message=FALSE, warning=FALSE}
 links = tribble(
   ~source, ~target, ~value, ~owner, ~scenario,
   0, 24, 0.2, "James", "J1",
@@ -302,7 +309,7 @@ nodes = tribble(
 )
 ```
 
-```{r, fig.height=7}
+```{r, include=FALSE, message=FALSE, warning=FALSE}
 sn <- sankeyNetwork(
   Links = links,
   Nodes = nodes, 
@@ -318,13 +325,13 @@ sn <- sankeyNetwork(
   fontSize = 11, 
   fontFamily = "Roboto",
   nodeWidth = 15,
-  margin = list(right = 150)
+  margin = list(right = 0)
 )
 
 sn <- onRender(
   sn,
   '
-  function(el,x){
+  function(el, x){
   var node_text = d3.select(el)
   .selectAll(".node text")
   .style("font-weight", "bold")
@@ -335,8 +342,12 @@ sn <- onRender(
   '
 )
 
-sn
+# saveWidget(sn, "playoff_paths.html")
 
+```
+
+```{r, fig.height=7, results='asis'}
+sn
 ```
 
 Row 
@@ -351,7 +362,7 @@ scenarios_df <- links %>%
   filter(stringr::str_length(scenario) > 0) %>%
   group_by(owner, scenario) %>% 
   summarise(outcomes = stringr::str_c(unique(name), collapse = "</br>")) %>% 
-  rename(Owner = owner, Scenario = scenario, Outcomes = outcomes)
+  rename(Owner = owner, Path = scenario, Steps = outcomes)
 
 scenarios_df %>% 
   datatable(escape = FALSE, rownames = FALSE, height = 2800,
@@ -386,83 +397,87 @@ LPP Scenarios
 Row 
 -----------------------------------------------------------------------
 
-### **26.2 Mile Road to Failure**
+### **First Steps Towards 26.2 Miles**
 
-```{r include=FALSE}
+```{r include=FALSE, message=FALSE, warning=FALSE}
 links2 = tribble(
   ~source, ~target, ~value, ~owner, ~scenario,
-  0, 24, 0.2, "James", "J1",
-  11, 24, 0.2, "James", "J1",
-  0, 25, 0.2, "James", "J2",
-  13, 25, 0.2, "James", "J2",
-  0, 26, 0.2, "James", "J3",
-  3, 26, 0.2, "James", "J3",
-  0, 27, 0.2, "James", "J4",
-  5, 27, 0.2, "James", "J4",
-  1, 28, 0.2, "James", "J5",
-  3, 28, 0.2, "James", "J5",
-  11, 28, 0.2, "James", "J5",
-  5, 28, 0.2, "James", "J5",
-  13, 28, 0.2, "James", "J5",
-  1, 29, 0.2, "James", "J6",
-  7, 29, 0.2, "James", "J6",
-  3, 29, 0.2, "James", "J6",
-  11, 29, 0.2, "James", "J6",
-  1, 30, 0.2, "James", "J7",
-  7, 30, 0.2, "James", "J7",
-  5, 30, 0.2, "James", "J7",
-  13, 30, 0.2, "James", "J7",
-  2, 31, 0.2, "Drew", "D1",
-  10, 31, 0.2, "Drew", "D1",
-  2, 32, 0.2, "Drew", "D2",
-  15, 32, 0.2, "Drew", "D2",
-  2, 33, 0.2, "Drew", "D3",
-  1, 33, 0.2, "Drew", "D3",
-  2, 34, 0.2, "Drew", "D4",
-  5, 34, 0.2, "Drew", "D4",
-  3, 35, 0.2, "Drew", "D5",
-  1, 35, 0.2, "Drew", "D5",
-  10, 35, 0.2, "Drew", "D5",
-  5, 35, 0.2, "Drew", "D5",
-  15, 35, 0.2, "Drew", "D5",
-  19, 35, 0.2, "Drew", "D5",
-  3, 36, 0.2, "Drew", "D6",
-  7, 36, 0.2, "Drew", "D6",
-  1, 36, 0.2, "Drew", "D6",
-  10, 36, 0.2, "Drew", "D6",
-  19, 36, 0.2, "Drew", "D6",
-  3, 37, 0.2, "Drew", "D7",
-  7, 37, 0.2, "Drew", "D7",
-  5, 37, 0.2, "Drew", "D7",
-  15, 37, 0.2, "Drew", "D7",
-  19, 37, 0.2, "Drew", "D7",
-  23, 37, 0.2, "Drew", "D7",
-  4, 38, 0.2, "Shep", "S1",
-  12, 38, 0.2, "Shep", "S1",
-  4, 39, 0.2, "Shep", "S2",
-  14, 39, 0.2, "Shep", "S2",
-  4, 40, 0.2, "Shep", "S3",
-  1, 40, 0.2, "Shep", "S3",
-  4, 41, 0.2, "Shep", "S4",
-  3, 41, 0.2, "Shep", "S4",
-  5, 42, 0.2, "Shep", "S5",
-  7, 42, 0.2, "Shep", "S5",
-  3, 42, 0.2, "Shep", "S5",
-  14, 42, 0.2, "Shep", "S5",
-  17, 42, 0.2, "Shep", "S5",
-  21, 42, 0.2, "Shep", "S5",
-  6, 43, 0.2, "Matt", "M1",
-  1, 43, 0.2, "Matt", "M1",
-  3, 43, 0.2, "Matt", "M1",
-  6, 44, 0.2, "Matt", "M2",
-  1, 44, 0.2, "Matt", "M2",
-  5, 44, 0.2, "Matt", "M2",
-  6, 45, 0.2, "Matt", "M3",
-  3, 45, 0.2, "Matt", "M3",
-  5, 45, 0.2, "Matt", "M3",
-  8, 46, 0.2, "Milf", "W1",
-  7, 46, 0.2, "Milf", "W1",
-  3, 46, 0.2, "Milf", "W1"
+  4, 20, 0.2, "Billy", "B1",
+  9, 20, 0.2, "Billy", "B1",
+  4, 21, 0.2, "Billy", "B2",
+  3, 21, 0.2, "Billy", "B2",
+  5, 22, 0.2, "Billy", "B3",
+  3, 22, 0.2, "Billy", "B3",
+  9, 22, 0.2, "Billy", "B3",
+  10, 22, 0.2, "Billy", "B3",
+  7, 22, 0.2, "Billy", "B3",
+  5, 23, 0.2, "Billy", "B4",
+  3, 23, 0.2, "Billy", "B4",
+  9, 23, 0.2, "Billy", "B4",
+  12, 23, 0.2, "Billy", "B4",
+  0, 23, 0.2, "Billy", "B4",
+  5, 24, 0.2, "Billy", "B5",
+  3, 24, 0.2, "Billy", "B5",
+  9, 24, 0.2, "Billy", "B5",
+  10, 24, 0.2, "Billy", "B5",
+  12, 24, 0.2, "Billy", "B5",
+  2, 25, 0.2, "Keith", "K1",
+  8, 25, 0.2, "Keith", "K1",
+  2, 26, 0.2, "Keith", "K2",
+  5, 26, 0.2, "Keith", "K2",
+  3, 27, 0.2, "Keith", "K3",
+  5, 27, 0.2, "Keith", "K3",
+  8, 27, 0.2, "Keith", "K3",
+  14, 27, 0.2, "Keith", "K3",
+  7, 27, 0.2, "Keith", "K3",
+  3, 28, 0.2, "Keith", "K4",
+  5, 28, 0.2, "Keith", "K4",
+  8, 28, 0.2, "Keith", "K4",
+  16, 28, 0.2, "Keith", "K4",
+  1, 28, 0.2, "Keith", "K4",
+  3, 29, 0.2, "Keith", "K5",
+  5, 29, 0.2, "Keith", "K5",
+  8, 29, 0.2, "Keith", "K5",
+  14, 29, 0.2, "Keith", "K5",
+  16, 29, 0.2, "Keith", "K5",
+  0, 30, 0.2, "Tony", "T1",
+  5, 30, 0.2, "Tony", "T1",
+  11, 30, 0.2, "Tony", "T1",
+  3, 30, 0.2, "Tony", "T1",
+  15, 30, 0.2, "Tony", "T1",
+  7, 30, 0.2, "Tony", "T1",
+  0, 31, 0.2, "Tony", "T2",
+  5, 31, 0.2, "Tony", "T2",
+  11, 31, 0.2, "Tony", "T2",
+  3, 31, 0.2, "Tony", "T2",
+  15, 31, 0.2, "Tony", "T2",
+  19, 31, 0.2, "Tony", "T2",
+  6, 32, 0.2, "Ross", "R1",
+  5, 32, 0.2, "Ross", "R1",
+  13, 32, 0.2, "Ross", "R1",
+  3, 32, 0.2, "Ross", "R1",
+  17, 32, 0.2, "Ross", "R1",
+  1, 32, 0.2, "Ross", "R1",
+  6, 33, 0.2, "Ross", "R2",
+  5, 33, 0.2, "Ross", "R2",
+  13, 33, 0.2, "Ross", "R2",
+  3, 33, 0.2, "Ross", "R2",
+  17, 33, 0.2, "Ross", "R2",
+  18, 33, 0.2, "Ross", "R2",
+  20, 34, 0.4, "Billy", "",
+  21, 34, 0.4, "Billy", "",
+  22, 34, 1, "Billy", "",
+  23, 34, 1, "Billy", "",
+  24, 34, 1, "Billy", "",
+  25, 35, 0.4, "Keith", "",
+  26, 35, 0.4, "Keith", "",
+  27, 35, 1, "Keith", "",
+  28, 35, 1, "Keith", "",
+  29, 35, 1, "Keith", "",
+  30, 36, 1.2, "Tony", "",
+  31, 36, 1.2, "Tony", "",
+  32, 37, 1.2, "Ross", "",
+  33, 37, 1.2, "Ross", ""
 
 )
 
@@ -470,54 +485,46 @@ nodes2 = tribble(
   ~node, ~name, ~foo,
   0, "James beats Tony", "R",
   1, "Tony beats James", "R",
-  4, "Kevin beats Keith", "R",
-  5, "Keith beats Kevin", "R",
-  6, "Matt beats Billy", "R",
-  7, "Billy beats Matt", "R",
-  8, "Milf beats Ross", "R",
-  9, "Ross beats Milf", "R",
-  10, "Billy scores > Keith + 33.4", "Points",
-  11, "Billy scores < Keith + 33.4", "Points",
-  12, "Tony scores > Billy + 2.6", "Points",
-  13, "Tony scores < Billy + 2.6", "Points",
-  14, "Ross scores > Billy + 4.8", "Points",
-  15, "Ross scores < Billy + 4.8", "Points",
-  16, "Tony scores > Keith + 36", "Points",
-  17, "Tony scores < Keith + 36", "Points",
-  18, "Ross scores > Keith + 28.6", "Points",
-  19, "Ross scores < Keith + 28.6", "Points",
-  20, "Tony scores > Ross + 7.4", "Points",
-  21, "Tony scores < Ross + 7.4", "Points",
-  24, "B1", "Billy",
-  25, "B2", "Billy",
-  26, "B3", "Billy",
-  27, "B4", "Billy",
-  28, "B5", "Billy",
-  29, "B6", "Billy",
-  30, "B7", "Billy",
-  31, "K1", "Keith",
-  32, "K2", "Keith",
-  33, "K3", "Keith",
-  34, "K4", "Keith",
-  35, "K5", "Keith",
-  36, "K6", "Keith",
-  37, "K7", "Keith",
-  38, "T1", "Tony",
-  39, "T2", "Tony",
-  40, "T3", "Tony",
-  41, "T4", "Tony",
-  42, "T5", "Tony",
-  43, "R1", "Ross",
-  44, "R2", "Ross",
-  45, "R3", "Ross",
-  51, "Billy MARATHON", "Billy",
-  52, "Keith MARATHON", "Keith",
-  53, "Tony MARATHON", "Tony",
-  54, "Ross MARATHON", "Ross"
+  2, "Kevin beats Keith", "R",
+  3, "Keith beats Kevin", "R",
+  4, "Matt beats Billy", "R",
+  5, "Billy beats Matt", "R",
+  6, "Milf beats Ross", "R",
+  7, "Ross beats Milf", "R",
+  8, "Billy scores > Keith + 33.4", "Points",
+  9, "Billy scores < Keith + 33.4", "Points",
+  10, "Tony scores > Billy + 2.6", "Points",
+  11, "Tony scores < Billy + 2.6", "Points",
+  12, "Ross scores > Billy + 4.8", "Points",
+  13, "Ross scores < Billy + 4.8", "Points",
+  14, "Tony scores > Keith + 36", "Points",
+  15, "Tony scores < Keith + 36", "Points",
+  16, "Ross scores > Keith + 28.6", "Points",
+  17, "Ross scores < Keith + 28.6", "Points",
+  18, "Tony scores > Ross + 7.4", "Points",
+  19, "Tony scores < Ross + 7.4", "Points",
+  20, "B1", "Billy",
+  21, "B2", "Billy",
+  22, "B3", "Billy",
+  23, "B4", "Billy",
+  24, "B5", "Billy",
+  25, "K1", "Keith",
+  26, "K2", "Keith",
+  27, "K3", "Keith",
+  28, "K4", "Keith",
+  29, "K5", "Keith",
+  30, "T1", "Tony",
+  31, "T2", "Tony",
+  32, "R1", "Ross",
+  33, "R2", "Ross",
+  34, "Billy MARATHON", "Billy",
+  35, "Keith MARATHON", "Keith",
+  36, "Tony MARATHON", "Tony",
+  37, "Ross MARATHON", "Ross"
 )
 ```
 
-```{r, fig.height=7}
+```{r, include=FALSE, message=FALSE, warning=FALSE}
 sn2 <- sankeyNetwork(
   Links = links2,
   Nodes = nodes2, 
@@ -528,19 +535,19 @@ sn2 <- sankeyNetwork(
   NodeGroup = "foo",
   LinkGroup = "owner",
   colourScale = JS("d3.scaleOrdinal()
-                   .domain(['James', 'Drew', 'Shep', 'Matt', 'Milf', 'Toby', 'R', 'Points'])
-                   .range(['#bcbd22', '#17becf', '#ffb300', '#7f7f7f', '#d62728','#393b79', '#000', '#777']);"),
+                   .domain(['Billy', 'Keith', 'Tony', 'Ross', 'R', 'Points'])
+                   .range(['#bcbd22', '#17becf', '#ffb300', '#7f7f7f', '#000', '#777']);"),
   fontSize = 11, 
   fontFamily = "Roboto",
   nodeWidth = 15,
-  margin = list(right = 150)
+  margin = list(right = 0)
 )
 
 sn2 <- onRender(
   sn2,
   '
-  function(el,x){
-  var node_text = d3.select(el)
+  function(el, x){
+  var node_text2 = d3.select(el)
   .selectAll(".node text")
   .style("font-weight", "bold")
   .filter(function(d) { return (d.name.search("beats|scores") > -1); })
@@ -549,9 +556,10 @@ sn2 <- onRender(
   }
   '
 )
+```
 
+```{r, fig.height=6}
 sn2
-
 ```
 
 Row 
@@ -566,7 +574,7 @@ scenarios_df2 <- links2 %>%
   filter(stringr::str_length(scenario) > 0) %>%
   group_by(owner, scenario) %>% 
   summarise(outcomes = stringr::str_c(unique(name), collapse = "</br>")) %>% 
-  rename(Owner = owner, Scenario = scenario, Outcomes = outcomes)
+  rename(Owner = owner, Path = scenario, Steps = outcomes)
 
 scenarios_df2 %>% 
   datatable(escape = FALSE, rownames = FALSE, height = 2800,
