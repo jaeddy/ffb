@@ -10,10 +10,15 @@ library(purrr)
 # rivalry_nums_2016 <- c(1, 4, 4, 2, 5, 2, 3, 6,
 #                        5, 3, 1, 6)
 
-teams_2017 <- c("Billy", "Brad", "Drew", "James", "Keith", "Kevin", 
+# teams_2017 <- c("Billy", "Brad", "Drew", "James", "Keith", "Kevin", 
+#                 "Matt", "Milf", "Ross", "Ryan", "Toby", "Tony")
+# divisions_2017 <- c("A", "B", "B", "B", "A", "A", "A", "A", "A", "B", "B", "B")
+# rivalry_nums_2017 <- c(1, 2, 2, 3, 4, 4, 1, 5, 5, 6, 6, 3)
+
+teams_2019 <- c("Billy", "Brad", "Drew", "James", "Keith", "Kevin", 
                 "Matt", "Milf", "Ross", "Ryan", "Toby", "Tony")
-divisions_2017 <- c("A", "B", "B", "B", "A", "A", "A", "A", "A", "B", "B", "B")
-rivalry_nums_2017 <- c(1, 2, 2, 3, 4, 4, 1, 5, 5, 6, 6, 3)
+divisions_2019 <- c("B", "A", "A", "B", "A", "A", "B", "B", "B", "A", "A", "B")
+rivalry_nums_2019 <- c(1, 2, 2, 3, 4, 4, 1, 5, 5, 6, 6, 3)
 
 get_schedule <- function(team, division, rivalry_num, draft_date) {
   set.seed(draft_date)
@@ -130,8 +135,10 @@ get_schedule <- function(team, division, rivalry_num, draft_date) {
 }
 
 # schedule2016 <- get_schedule(teams, divisions_2016, rivalry_nums, "20160827")
-schedule2017 <- get_schedule(teams_2017, divisions_2017, rivalry_nums_2017, 
-                             "20170902")
+# schedule2017 <- get_schedule(teams_2017, divisions_2017, rivalry_nums_2017, 
+#                              "20170902")
+schedule2019 <- get_schedule(teams_2019, divisions_2019, rivalry_nums_2019, 
+                             "20190818")
 
 
 # randomize_schedule <- function(teams, divisions, rivalries) {
