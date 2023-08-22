@@ -1,0 +1,261 @@
+---
+title: "Jeff Cup Auction History"
+format: html
+editor: visual
+---
+
+```{r}
+library(config)
+library(tidyverse)
+library(glue)
+```
+
+
+```{r}
+PRO_TEAM_MAP = c(
+    "0" = 'None',
+    "1" = 'ATL',
+    "2" = 'BUF',
+    "3" = 'CHI',
+    "4" = 'CIN',
+    "5" = 'CLE',
+    "6" = 'DAL',
+    "7" = 'DEN',
+    "8" = 'DET',
+    "9" = 'GB',
+    "10" = 'TEN',
+    "11" = 'IND',
+    "12" = 'KC',
+    "13" = 'OAK',
+    "14" = 'LAR',
+    "15" = 'MIA',
+    "16" = 'MIN',
+    "17" = 'NE',
+    "18" = 'NO',
+    "19" = 'NYG',
+    "20" = 'NYJ',
+    "21" = 'PHI',
+    "22" = 'ARI',
+    "23" = 'PIT',
+    "24" = 'LAC',
+    "25" = 'SF',
+    "26" = 'SEA',
+    "27" = 'TB',
+    "28" = 'WSH',
+    "29" = 'CAR',
+    "30" = 'JAX',
+    "33" = 'BAL',
+    "34" = 'HOU'
+) %>% 
+  set_names(names(.) %>% 
+              str_c("^", ., "$"))
+```
+
+
+```{r}
+espn_get <- function(league, params, headers = c(), extend = "") {
+  endpoint <- glue::glue("{endpoint}{extend}", endpoint = league$ENDPOINT)
+  cookie <- paste(names(league$cookies), league$cookies, sep = "=", collapse = ";")
+  r <- httr::GET(
+    endpoint,
+    query = params,
+    add_headers(headers),
+    config = httr::config(cookie = cookie)
+  )
+  content(r)
+}
+
+league_get <- function(league, params, headers = c(), extend = "") {
+  endpoint <- glue::glue("{endpoint}{extend}", endpoint = league$LEAGUE_ENDPOINT)
+  cookie <- paste(names(league$cookies), league$cookies, sep = "=", collapse = ";")
+  r <- httr::GET(
+    endpoint,
+    query = params,
+    add_headers(headers),
+    config = httr::config(cookie = cookie)
+  )
+  content(r)
+}
+
+get_league <- function(league) {
+  params <- list(view = "mTeam",
+                 view = "mRoster",
+                 view = "mMatchup",
+                 view = "mSettings",
+                 view = "mStandings")
+  league_get(league, params)
+}
+
+get_league_draft <- function(league) {
+  params <- list(view = "mDraftDetail")
+  league_get(league, params)
+}
+
+get_pro_players <- function(league) {
+  params <- list(view = "players_wl")
+  filters <- list(filterActive = list(value = TRUE))
+  headers <- c("x-fantasy-filter" = jsonlite::toJSON(filters, auto_unbox = TRUE))
+  espn_get(league, params, headers, extend = "/players")
+}
+```
+
+```{r}
+get_league_years <- function(years, league_id = 52048) {
+  FFB_BASE_ENDPOINT <- "https://fantasy.espn.com/apis/v3/games/ffl"
+
+  map(years, function(year) {
+    league <- list(
+      ENDPOINT = glue("{FFB_BASE_ENDPOINT}/seasons/{year}"),
+      LEAGUE_ENDPOINT = glue("{FFB_BASE_ENDPOINT}/seasons/{year}",
+                             "/segments/0/leagues/{league_id}"),
+      cookies = c(
+        espn_s2 = config::get("ESPN_S2"),
+        SWID = config::get("ESPN_SWID")
+      )
+    )
+    
+    league$data <- get_league(league)
+    league$member_detail <- league$data$members %>% 
+      map_df(function(m) {
+        as_tibble(m) %>% 
+          select(-notificationSettings) %>% 
+          distinct()
+      })
+    
+    league$team_detail <- league$data$teams %>% 
+      map_df(function(t) {
+        t[c("id", "location", "nickname", "abbrev", "primaryOwner")] %>% 
+          as_tibble()
+      })
+    
+    league$draft_data <- get_league_draft(league)
+    league$draft_detail <- league$draft_data$draftDetail$picks %>%  
+      map_df(as_tibble) %>% 
+      select(-autoDraftTypeId, -keeper, -reservedForKeeper, -tradeLocked) %>% 
+      relocate(id, .before = bidAmount)
+    
+    league$player_data <- get_pro_players(league)
+    league$player_detail <- league$player_data %>% 
+      map_df(function(p) {
+        as_tibble(p) %>% 
+          select(id, fullName, defaultPositionId, proTeamId) %>% 
+          distinct()
+      })
+    
+    league$draft_recap <- league$draft_detail %>% 
+      select(-nominatingTeamId, -overallPickNumber, -roundId, -roundPickNumber,
+             -lineupSlotId, -memberId) %>% 
+      left_join(league$player_detail, by = c("playerId" = "id")) %>% 
+      mutate(position = case_when(
+        defaultPositionId == 2 ~ "RB",
+        defaultPositionId == 1 ~ "QB",
+        defaultPositionId == 3 ~ "WR",
+        defaultPositionId == 4 ~ "TE",
+        defaultPositionId == 16 ~ "D/ST"
+      )) %>% 
+      mutate(
+        proTeamId = as.character(proTeamId),
+        proTeam = str_replace_all(proTeamId, PRO_TEAM_MAP)
+      ) %>% 
+      left_join(league$team_detail, by = c("teamId" = "id")) %>%
+      left_join(league$member_detail, by = c("primaryOwner" = "id")) %>%
+      select(-playerId, -defaultPositionId, -proTeamId, -teamId, -primaryOwner)
+    
+    league
+  }) %>% 
+    set_names(as.character(years))
+}
+```
+
+```{r}
+years <- c(2018, 2019, 2020, 2021, 2022)
+league_data <- get_league_years(years)
+```
+
+```{r, warning=FALSE}
+draft_values <- map_df(league_data, .id = "year", function(d) {
+  d$draft_recap %>% 
+    filter(position != "D/ST") %>% 
+    mutate(overallRank = dplyr::min_rank(-bidAmount)) %>% 
+    group_by(position) %>% 
+    mutate(positionRank = dplyr::min_rank(-bidAmount)) %>% 
+    ungroup()
+}) %>% 
+  filter(!year %in% c("2018", "2019"))
+
+p <- draft_values %>% 
+  # filter(year == "2022") %>% 
+  ggplot(aes(x = positionRank, y = bidAmount)) +
+  geom_point(aes(colour = year)) +
+  geom_smooth(span = 0.45) +
+  facet_wrap(~ position) +
+  theme(axis.text.x=element_blank(),
+      axis.ticks.x=element_blank(),
+      axis.text.y=element_blank(),
+      axis.ticks.y=element_blank())
+  # scale_colour_viridis_c(end = 0.9, direction = -1)
+p
+```
+```{r}
+draft_values %>% 
+  filter(position == "TE") %>% 
+  .$positionRank %>% 
+  max()
+```
+
+```{r}
+model_qb <- draft_values %>% 
+  filter(position == "QB") %>% 
+  loess(bidAmount ~ positionRank, data = .)
+
+pred_qb <- tibble(
+  position = "QB",
+  rank = 1:16,
+  amount = predict(model_qb, newdata = 1:16, SE = TRUE)
+)
+
+model_rb <- draft_values %>% 
+  filter(position == "RB") %>% 
+  loess(bidAmount ~ positionRank, data = .)
+
+pred_rb <- tibble(
+  position = "RB",
+  rank = 1:49,
+  amount = predict(model_rb, newdata = 1:49, SE = TRUE)
+)
+
+model_wr <- draft_values %>% 
+  filter(position == "WR") %>% 
+  loess(bidAmount ~ positionRank, data = .)
+
+pred_wr <- tibble(
+  position = "WR",
+  rank = 1:53,
+  amount = predict(model_wr, newdata = 1:53, SE = TRUE)
+)
+
+model_te <- draft_values %>% 
+  filter(position == "TE") %>% 
+  loess(bidAmount ~ positionRank, data = .)
+
+pred_te <- tibble(
+  position = "TE",
+  rank = 1:14,
+  amount = predict(model_qb, newdata = 1:14, SE = TRUE)
+)
+
+pred_values <- bind_rows(
+  pred_qb,
+  pred_rb,
+  pred_wr,
+  pred_te
+)
+```
+
+
+```{r}
+ss <- "https://docs.google.com/spreadsheets/d/1Pt50fh9AM-a9giQCuQUrkI2NbROHlBGsb4PPHk3utFI"
+pred_values %>% 
+  googlesheets4::sheet_write(ss, "Predicted Costs")
+```
+
