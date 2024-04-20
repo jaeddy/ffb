@@ -1,5 +1,5 @@
 ---
-title: "Jeff Cup Auction History"
+title: "2023 Draft Recap"
 format: html
 editor: visual
 ---
@@ -8,7 +8,6 @@ editor: visual
 library(config)
 library(tidyverse)
 library(glue)
-library(httr)
 ```
 
 ```{r}
@@ -123,8 +122,7 @@ get_league_years <- function(years, league_id = 52048) {
     
     league$team_detail <- league$data$teams %>% 
       map_df(function(t) {
-        t %>% .[[1]]
-        t[c("id", "name", "abbrev", "primaryOwner")] %>% 
+        t[c("id", "location", "nickname", "abbrev", "primaryOwner")] %>% 
           as_tibble()
       })
     
@@ -168,93 +166,10 @@ get_league_years <- function(years, league_id = 52048) {
 ```
 
 ```{r}
-years <- c(2018, 2019, 2020, 2021, 2022, 2023)
-league_data <- get_league_years(years)
-```
-
-```{r, warning=FALSE}
-draft_values <- map_df(league_data, .id = "year", function(d) {
-  d$draft_recap %>% 
-    filter(position != "D/ST") %>% 
-    mutate(overallRank = dplyr::min_rank(-bidAmount)) %>% 
-    group_by(position) %>% 
-    mutate(positionRank = dplyr::min_rank(-bidAmount)) %>% 
-    ungroup()
-}) %>% 
-  filter(!year %in% c("2018", "2019"))
-
-p <- draft_values %>% 
-  # filter(year == "2022") %>% 
-  ggplot(aes(x = positionRank, y = bidAmount)) +
-  geom_point(aes(colour = year)) +
-  geom_smooth(span = 0.45) +
-  facet_wrap(~ position)
-  # theme(axis.text.x=element_blank(),
-  #     axis.ticks.x=element_blank(),
-  #     axis.text.y=element_blank(),
-  #     axis.ticks.y=element_blank())
-  # scale_colour_viridis_c(end = 0.9, direction = -1)
-p
+league_2023 <- get_league_years(2022)
 ```
 
 ```{r}
-draft_values %>% 
-  filter(position == "TE") %>% 
-  .$positionRank %>% 
-  max()
+league_2023[["2023"]]$draft_data$draftDetail$picks[[1]]
 ```
 
-```{r}
-model_qb <- draft_values %>% 
-  filter(position == "QB") %>% 
-  loess(bidAmount ~ positionRank, data = .)
-
-pred_qb <- tibble(
-  position = "QB",
-  rank = 1:16,
-  amount = predict(model_qb, newdata = 1:16, SE = TRUE)
-)
-
-model_rb <- draft_values %>% 
-  filter(position == "RB") %>% 
-  loess(bidAmount ~ positionRank, data = .)
-
-pred_rb <- tibble(
-  position = "RB",
-  rank = 1:49,
-  amount = predict(model_rb, newdata = 1:49, SE = TRUE)
-)
-
-model_wr <- draft_values %>% 
-  filter(position == "WR") %>% 
-  loess(bidAmount ~ positionRank, data = .)
-
-pred_wr <- tibble(
-  position = "WR",
-  rank = 1:53,
-  amount = predict(model_wr, newdata = 1:53, SE = TRUE)
-)
-
-model_te <- draft_values %>% 
-  filter(position == "TE") %>% 
-  loess(bidAmount ~ positionRank, data = .)
-
-pred_te <- tibble(
-  position = "TE",
-  rank = 1:14,
-  amount = predict(model_qb, newdata = 1:14, SE = TRUE)
-)
-
-pred_values <- bind_rows(
-  pred_qb,
-  pred_rb,
-  pred_wr,
-  pred_te
-)
-```
-
-```{r}
-ss <- "https://docs.google.com/spreadsheets/d/1Pt50fh9AM-a9giQCuQUrkI2NbROHlBGsb4PPHk3utFI"
-pred_values %>% 
-  googlesheets4::sheet_write(ss, "Predicted Costs")
-```
